@@ -1,0 +1,7 @@
+.vs
+*.sln
+*packages/
+Sample
+*bin
+*obj
+
