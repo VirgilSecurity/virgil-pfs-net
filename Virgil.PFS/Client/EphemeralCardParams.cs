@@ -5,6 +5,6 @@
     public class EphemeralCardParams
     {
         public string Identity { get; set; }
-        public KeyPair KeyPair { get; set; }
+        public IPublicKey PublicKey { get; set; }
     }
 }

@@ -19,7 +19,8 @@ namespace Virgil.PFS.Client
             Converters =
             {
                 new StringEnumConverter()
-            }
+            },
+            MissingMemberHandling = MissingMemberHandling.Error
         };
 
         public static string Serialize(object model)

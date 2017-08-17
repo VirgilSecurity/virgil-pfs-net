@@ -8,9 +8,9 @@ namespace Virgil.PFS
     public class RecipientModel
     {
         [JsonProperty("long_time_card")]
-        public CardModel LTCardModel { get; set; }
+        public CardModel LTCard { get; set; }
 
         [JsonProperty("one_time_cards")]
-        public List<CardModel> OTCardModels { get; set; }
+        public List<CardModel> OTCards { get; set; }
     }
 }

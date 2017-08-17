@@ -51,7 +51,7 @@
     <Compile Include="Client\EphemeralCardsRequest.cs" />
     <Compile Include="Client\Connection\PfsServiceResponseErrorHandler.cs" />
     <Compile Include="Client\Connection\IResponseErrorHandler.cs" />
-    <Compile Include="Client\JsonSerializer.cs" />
+    <Compile Include="Utils\JsonSerializer.cs" />
     <Compile Include="Client\Models\CredentialsModel.cs" />
     <Compile Include="Client\Models\RequestModels\EphemeralCardRequestMetaModel.cs" />
     <Compile Include="Client\Models\RequestModels\EphemeralCardRequestModel.cs" />
@@ -61,16 +61,38 @@
     <Compile Include="Client\Connection\RequestExtensions.cs" />
     <Compile Include="Client\Connection\ResponseExtensions.cs" />
     <Compile Include="Client\EphemeralRequestFactory.cs" />
+    <Compile Include="EphemeralCardManager.cs" />
+    <Compile Include="EphemeralCardValidator.cs" />
+    <Compile Include="Message\InitialMessage.cs" />
+    <Compile Include="Session\InitiatorSessionState.cs" />
+    <Compile Include="Session\ISessionStateHolder.cs" />
+    <Compile Include="KeyUtils\KeyHolder.cs" />
+    <Compile Include="KeyUtils\LTKeyHolder.cs" />
+    <Compile Include="KeyUtils\OtKeyHolder.cs" />
+    <Compile Include="KeyUtils\SessionKeyHolder.cs" />
+    <Compile Include="Message\Message.cs" />
+    <Compile Include="Message\MessageHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Client\Models\RequestModels\RecipientRequestModel.cs" />
+    <Compile Include="Session\ResponderSessionState.cs" />
     <Compile Include="SecureChat.cs" />
-    <Compile Include="SecureSession.cs" />
+    <Compile Include="SecureChatKeyHelper.cs" />
+    <Compile Include="SecureChatParams.cs" />
+    <Compile Include="Session\SecureSession.cs" />
     <Compile Include="Client\Models\ValidateOTCsModel.cs" />
+    <Compile Include="Session\SecureSessionHelper.cs" />
+    <Compile Include="Session\SecureSessionInitiator.cs" />
+    <Compile Include="Session\SecureSessionResponder.cs" />
+    <Compile Include="ServiceInfo.cs" />
+    <Compile Include="Session\SessionState.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\portable-net45+win8+wp8+wpa81\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Virgil.Crypto">
+      <HintPath>..\packages\Virgil.Crypto.2.2.3\lib\net45\Virgil.Crypto.dll</HintPath>
     </Reference>
     <Reference Include="Virgil.SDK">
       <HintPath>..\..\..\sdk-net2\virgil-sdk-net\SDK\Source\Virgil.SDK.NetFx\bin\Debug\Virgil.SDK.dll</HintPath>
@@ -84,6 +106,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

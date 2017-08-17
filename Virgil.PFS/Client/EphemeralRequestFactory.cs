@@ -15,10 +15,10 @@ namespace Virgil.PFS
 {
     public class EphemeralRequestFactory
     {
-        private readonly VirgilCrypto crypto;
+        private readonly ICrypto crypto;
         private readonly RequestSigner requestSigner;
 
-        public EphemeralRequestFactory(VirgilCrypto crypto)
+        public EphemeralRequestFactory(ICrypto crypto)
         {
             this.crypto = crypto;
             this.requestSigner = new RequestSigner(crypto);
@@ -50,8 +50,7 @@ namespace Virgil.PFS
         private EphemeralCardRequestModel CreateLtCardRequestModel(EphemeralCardParams ltCardParams, CardSigner[] signers)
         {
             var ltcRequest = new PublishCardRequest(ltCardParams.Identity, 
-                "member", crypto.ExportPublicKey(ltCardParams.KeyPair.PublicKey));
-
+                "member", crypto.ExportPublicKey(ltCardParams.PublicKey));
             
             foreach (var signer in signers)
             {
@@ -79,7 +78,7 @@ namespace Virgil.PFS
             foreach (var otCard in otCards)
             {
                 var otcRequest = new PublishCardRequest(otCard.Identity, "member",
-                    crypto.ExportPublicKey(otCard.KeyPair.PublicKey));
+                    crypto.ExportPublicKey(otCard.PublicKey));
 
                 foreach (var signer in signers)
                 {

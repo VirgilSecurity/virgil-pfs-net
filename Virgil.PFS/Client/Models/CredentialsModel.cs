@@ -11,10 +11,10 @@ namespace Virgil.PFS
     public class CredentialsModel
     {
         [JsonProperty("long_time_card")]
-        public CardModel LTCardModel { get; set; }
+        public CardModel LTCard { get; set; }
 
         [JsonProperty("one_time_card")]
-        public CardModel OTCardModel { get; set; }
+        public CardModel OTCard { get; set; }
 }
 }
 
