@@ -20,15 +20,26 @@ namespace Virgil.PFS
 
         public SecureSessionResponder(ICrypto crypto, IPrivateKey myPrivateKey, CardModel myIdentityCard,
             CardModel initiatorIdentityCard, byte[] additionalData,
-            SecureChatKeyHelper keyHelper, bool recovered = false) :
-            base(crypto, myPrivateKey, recovered, additionalData)
+            SecureChatKeyHelper keyHelper, SecureSessionHelper sessionHelper, DateTime expiredAt, bool recovered = false) :
+            base(crypto, myPrivateKey, recovered, expiredAt, additionalData)
         {
             this.initiatorIdentityCard = initiatorIdentityCard;
             this.keyHelper = keyHelper;
-            this.sessionHelper = new SecureSessionHelper(myIdentityCard.Id);
+            //todo change
+            this.sessionHelper = sessionHelper;
+            //this.sessionHelper = new SecureSessionHelper(myIdentityCard.Id);
+            
         }
 
-
+        public SecureSessionResponder(ICrypto crypto, IPrivateKey myPrivateKey, CardModel myIdentityCard,
+            CardModel initiatorIdentityCard, byte[] additionalData,
+            SecureChatKeyHelper keyHelper, SecureSessionHelper sessionHelper, 
+            byte[] initiatorEphPublicKeyData, string responderLtcId, string responderOtcId, DateTime expiredAt) :
+            this(crypto, myPrivateKey, myIdentityCard, initiatorIdentityCard, additionalData,
+            keyHelper, sessionHelper, expiredAt, true)
+        {
+            this.InitializeSession(initiatorEphPublicKeyData, responderLtcId, responderOtcId );
+        }
 
         internal string Decrypt(InitialMessage encryptedMessage)
         {

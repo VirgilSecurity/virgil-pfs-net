@@ -28,12 +28,13 @@ namespace Virgil.PFS
         public SecureSession(ICrypto crypto, 
             IPrivateKey myPrivateKey, 
             bool recovered, 
+            DateTime expiredAt,
             byte[] additionalData)
         {
             this.crypto = crypto;
             this.myPrivateKey = myPrivateKey;
             this.createdAt = DateTime.Now;
-            this.expiredAt = DateTime.Now.AddDays(5);
+            this.expiredAt = expiredAt;
             this.pfs = new VirgilPFS();
             this.isRecovered = recovered;
             this.additionalData = additionalData;

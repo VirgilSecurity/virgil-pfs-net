@@ -97,9 +97,8 @@
     <Reference Include="Virgil.SDK">
       <HintPath>..\..\..\sdk-net2\virgil-sdk-net\SDK\Source\Virgil.SDK.NetFx\bin\Debug\Virgil.SDK.dll</HintPath>
     </Reference>
-    <Reference Include="Virgil.SDK.Contracts, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Virgil.SDK.Contracts.1.1.2.0\lib\portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10\Virgil.SDK.Contracts.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Virgil.SDK.Contracts">
+      <HintPath>..\..\..\sdk-net2\virgil-sdk-net\SDK\Source\Virgil.SDK.NetFx\bin\Debug\Virgil.SDK.Contracts.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

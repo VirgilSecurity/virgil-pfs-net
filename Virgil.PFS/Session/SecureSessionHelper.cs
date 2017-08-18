@@ -3,21 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Sample;
 using Virgil.PFS;
 using Virgil.PFS.Client;
 
 namespace Virgil.PFS
 {
-    internal class SecureSessionHelper
+    public class SecureSessionHelper
     {
         private string ownerCardId;
         private ISessionStateHolder sessionStateHolder;
 
-        public SecureSessionHelper(string cardId)
+        public SecureSessionHelper(string cardId, ISessionStateHolder sessionStateHolder)
         {
             this.ownerCardId = cardId;
-            this.sessionStateHolder = new SessionStateHolder(cardId);
+
+            this.sessionStateHolder = sessionStateHolder;
+            //this.sessionStateHolder = new SessionStateHolder(cardId);
         }
 
         public SessionState GetSessionState(string cardId)
@@ -34,7 +35,9 @@ namespace Virgil.PFS
 
               foreach (var sessionStateName in sessionStateNames)
               {
-                  var sessionState = this.TryDeserializeSessionState(sessionStateName);
+                  var sessionState = this.TryDeserializeSessionState(
+                      this.sessionStateHolder.Load(sessionStateName)
+                      );
                   if (sessionState.GetType() == typeof(InitiatorSessionState))
                   {
                     var el = new InitiatorStruct()
@@ -97,7 +100,7 @@ namespace Virgil.PFS
         {
             this.sessionStateHolder.Save(JsonSerializer.Serialize(sessionState), cardId);
         }
-
+        
         public void DeleteAllSessionStates()
         {
             this.sessionStateHolder.DeleteAll();
@@ -109,14 +112,14 @@ namespace Virgil.PFS
 
             try
             {
-                sessionState = JsonSerializer.Deserialize<InitiatorSessionState>(data);
+                sessionState = JsonSerializer.Deserialize<InitiatorSessionState>(data, true);
                 return sessionState;
             }
             catch (Exception)
             {
                 try
                 {
-                    sessionState = JsonSerializer.Deserialize<ResponderSessionState>(data);
+                    sessionState = JsonSerializer.Deserialize<ResponderSessionState>(data, true);
                     return sessionState;
                 }
                 catch (Exception)
@@ -127,19 +130,19 @@ namespace Virgil.PFS
         }
     }
 
-    internal struct Result
+    public struct Result
     {
         public List<InitiatorStruct> Initiators;
         public List<ResponderStruct> Responders;
     }
 
-    internal struct InitiatorStruct
+    public struct InitiatorStruct
     {
         public string CardId;
         public InitiatorSessionState SessionState;
     }
 
-    internal struct ResponderStruct
+    public struct ResponderStruct
     {
         public string CardId;
         public ResponderSessionState SessionState;

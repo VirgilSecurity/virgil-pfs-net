@@ -13,9 +13,14 @@ namespace Virgil.PFS
         {
         }
 
-        public override string GenerateKeyName(string cardId)
+        protected override string StoragePrefix()
         {
-            return $"ot.{cardId}";
+            return ".ot.";
+        }
+
+        public void RemoveExpiredKeys(string[] exhaustedOtCardIds)
+        {
+
         }
     }
 }

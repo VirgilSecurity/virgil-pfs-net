@@ -14,7 +14,7 @@ namespace Virgil.PFS.Client
     /// </summary>
     public class JsonSerializer
     {
-        private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
+        private static readonly JsonSerializerSettings SettingsWithMissingError = new JsonSerializerSettings
         {
             Converters =
             {
@@ -23,14 +23,22 @@ namespace Virgil.PFS.Client
             MissingMemberHandling = MissingMemberHandling.Error
         };
 
-        public static string Serialize(object model)
+        private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
         {
-            return JsonConvert.SerializeObject(model, Settings);
+            Converters =
+            {
+                new StringEnumConverter()
+            }
+        };
+
+        public static string Serialize(object model, bool usingMissingMemberHandling = false)
+        {
+            return JsonConvert.SerializeObject(model, usingMissingMemberHandling ? SettingsWithMissingError : Settings);
         }
 
-        public static TModel Deserialize<TModel>(string json)
+        public static TModel Deserialize<TModel>(string json, bool usingMissingMemberHandling = false)
         {
-            return JsonConvert.DeserializeObject<TModel>(json, Settings);
+            return JsonConvert.DeserializeObject<TModel>(json, usingMissingMemberHandling ? SettingsWithMissingError : Settings);
         }
     }
 }

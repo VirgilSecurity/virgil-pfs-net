@@ -30,16 +30,20 @@ namespace Virgil.PFS
             CredentialsModel recipientCredentials,
             CardModel recipientIdentityCard,
             byte[] additionalData,
+            SecureSessionHelper sessionHelper,
+            DateTime expiredAt,
             bool recovered = false
             )
-            : base(crypto, myPrivateKey, recovered, additionalData)
+            : base(crypto, myPrivateKey, recovered, expiredAt, additionalData)
         {
             this.myIdentityCard = myIdentityCard;
             this.myEphPrivateKey = myEphPrivateKey;
             this.myEphKeyName = myEphKeyName;
             this.recipientCredentials = recipientCredentials;
             this.recipientIdentityCard = recipientIdentityCard;
-            this.sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id);
+            // todo change
+            //this.sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id);
+            this.sessionHelper = sessionHelper;
             if (recovered)
             {
             this.InitializeSession();

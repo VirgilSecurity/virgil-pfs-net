@@ -24,7 +24,7 @@ namespace Virgil.PFS
             InitialMessage msg = null;
             try
             {
-                msg = JsonSerializer.Deserialize<InitialMessage>(message);
+                msg = JsonSerializer.Deserialize<InitialMessage>(message, true);
             }
             catch (Exception)
             {
@@ -38,7 +38,7 @@ namespace Virgil.PFS
             Message msg = null;
             try
             {
-                msg = JsonSerializer.Deserialize<Message>(message);
+                msg = JsonSerializer.Deserialize<Message>(message, true);
             }
             catch (Exception)
             {

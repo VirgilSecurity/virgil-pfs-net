@@ -13,9 +13,9 @@ namespace Virgil.PFS.KeyUtils
         {
         }
 
-        public override string GenerateKeyName(string recipientId)
+        protected override string StoragePrefix()
         {
-            return $"ss.{recipientId}";
+            return ".ss.";
         }
     }
 }

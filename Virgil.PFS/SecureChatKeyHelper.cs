@@ -17,12 +17,12 @@ namespace Virgil.PFS
         private OtKeyHolder otKeyHolder;
 
 
-        public SecureChatKeyHelper(ICrypto crypto, string ownerCardId)
+        public SecureChatKeyHelper(ICrypto crypto, string ownerCardId, int ltKeyLifeDays)
         {
             this.crypto = crypto;
             this.ownerCardId = ownerCardId;
             this.sessionKeyHolder = new SessionKeyHolder(crypto, ownerCardId);
-            this.ltKeyHolder = new LtKeyHolder(crypto, ownerCardId);
+            this.ltKeyHolder = new LtKeyHolder(crypto, ownerCardId, ltKeyLifeDays);
             this.otKeyHolder = new OtKeyHolder(crypto, ownerCardId);
         }
 
@@ -39,8 +39,5 @@ namespace Virgil.PFS
         {
             return this.otKeyHolder;
         }
-
-
-
     }
 }
