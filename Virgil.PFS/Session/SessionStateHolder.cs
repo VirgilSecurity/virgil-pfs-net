@@ -13,7 +13,6 @@ namespace Virgil.PFS
 
     internal class SessionStateHolder : ISessionStateHolder
     {
-        private readonly string folderPath;
         protected IKeyStorage keyStorage;
         private const string sessionFolder = "Sessions";
         protected string ownerId;
@@ -75,12 +74,6 @@ namespace Virgil.PFS
             }
 
             this.keyStorage.Delete(cardId);
-        }
-
-
-        private string GetSessionStatePath(string alias)
-        {
-            return Path.Combine(this.folderPath, alias.ToLower());
         }
 
     }

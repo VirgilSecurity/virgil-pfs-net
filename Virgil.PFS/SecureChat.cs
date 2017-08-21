@@ -18,7 +18,6 @@ namespace Virgil.PFS
         private readonly ICrypto crypto;
         private readonly IPrivateKey myPrivateKey;
         private readonly CardModel myIdentityCard;
-        private readonly SecureSession session;
         private readonly EphemeralCardManager cardManager;
         private readonly SecureSessionHelper sessionHelper;
         private readonly SecureChatKeyHelper keyHelper;
