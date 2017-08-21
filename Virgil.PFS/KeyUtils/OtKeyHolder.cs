@@ -17,10 +17,5 @@ namespace Virgil.PFS
         {
             return ".ot.";
         }
-
-        public void RemoveExpiredKeys(string[] exhaustedOtCardIds)
-        {
-
-        }
     }
 }

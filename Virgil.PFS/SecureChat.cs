@@ -21,8 +21,9 @@ namespace Virgil.PFS
         private readonly EphemeralCardManager cardManager;
         private readonly SecureSessionHelper sessionHelper;
         private readonly SecureChatKeyHelper keyHelper;
+        private readonly DateTime sessionExpireTime;
 
-        public SecureChat(SecureChatParams parameters, ISessionStateHolder sessionStateHolder)
+        public SecureChat(SecureChatParams parameters)
         {
             this.parameters = parameters;
             this.crypto = parameters.Crypto;
@@ -30,7 +31,10 @@ namespace Virgil.PFS
             this.myIdentityCard = parameters.IdentityCard;
             this.keyHelper = new SecureChatKeyHelper(crypto, this.myIdentityCard.Id, parameters.LtPrivateKeyLifeDays);
             this.cardManager = new EphemeralCardManager(this.crypto, this.keyHelper, parameters.ServiceInfo);
-            this.sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id, sessionStateHolder);
+            this.sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id);
+
+            this.sessionExpireTime = DateTime.Now.AddDays(this.parameters.SessionLifeDays);
+
 
         }
 
@@ -107,9 +111,7 @@ namespace Virgil.PFS
             this.CheckExistingSession(recipientCard);
 
             var credentials = await this.cardManager.GetCredentialsByIdentityCard(recipientCard);
-
             var ephemeralKeyPair = crypto.GenerateKeys();
-            var expiredAt = DateTime.Now.AddDays(this.parameters.SessionLifeDays);
 
             var secureSession = new SecureSessionInitiator(this.crypto,
                 this.myPrivateKey,
@@ -119,8 +121,7 @@ namespace Virgil.PFS
                 credentials,
                 recipientCard,
                 additionalData,
-                this.sessionHelper,
-                expiredAt
+                this.sessionExpireTime
                 );
             return secureSession;
         }
@@ -200,7 +201,6 @@ namespace Virgil.PFS
             if (MessageHelper.IsInitialMessage(msg))
             {
                 var initialMessage = MessageHelper.ExtractInitialMessage(msg);
-                var expiredAt = DateTime.Now.AddDays(this.parameters.SessionLifeDays);
 
                 var sessionResponder = new SecureSessionResponder(
                     this.crypto,
@@ -209,8 +209,7 @@ namespace Virgil.PFS
                     recipientCard,
                     additionalData,
                     this.keyHelper,
-                    this.sessionHelper,
-                    expiredAt);
+                    this.sessionExpireTime);
                 sessionResponder.Decrypt(initialMessage);
 
                 return sessionResponder;
@@ -270,7 +269,6 @@ namespace Virgil.PFS
                 new CredentialsModel() { LTCard = sessionState.RecipientLtCard, OTCard = sessionState.RecipientOtCard },
                 sessionState.RecipientCard,
                 sessionState.AdditionalData,
-                this.sessionHelper,
                 sessionState.ExpiredAt,
                 true
             );
@@ -286,7 +284,6 @@ namespace Virgil.PFS
                 sessionState.InitiatorIdentityCard,
                 sessionState.AdditionalData,
                 this.keyHelper,
-                this.sessionHelper,
                 sessionState.InitiatorEphPublicKeyData,
                 sessionState.ResponderLtCardId,
                 sessionState.ResponderOtCardId,
@@ -297,7 +294,6 @@ namespace Virgil.PFS
 
         public void GentleReset()
         {
-
             var sessionStates = this.sessionHelper.GetAllSessionStates();
             foreach (var initiator in sessionStates.Initiators)
             {
@@ -309,6 +305,9 @@ namespace Virgil.PFS
                 this.RemoveResponderSession(responder.CardId, responder.SessionState);
             }
 
+            this.keyHelper.OtKeyHolder().RemoveAllKeys();
+            this.keyHelper.LtKeyHolder().RemoveAllKeys();
+            this.keyHelper.SessionKeyHolder().RemoveAllKeys();
         }
     }
 }

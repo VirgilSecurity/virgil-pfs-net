@@ -13,12 +13,11 @@ namespace Virgil.PFS
         private string ownerCardId;
         private ISessionStateHolder sessionStateHolder;
 
-        public SecureSessionHelper(string cardId, ISessionStateHolder sessionStateHolder)
+        public SecureSessionHelper(string cardId)
         {
             this.ownerCardId = cardId;
 
-            this.sessionStateHolder = sessionStateHolder;
-            //this.sessionStateHolder = new SessionStateHolder(cardId);
+            this.sessionStateHolder = new SessionStateHolder(cardId);
         }
 
         public SessionState GetSessionState(string cardId)
@@ -99,11 +98,6 @@ namespace Virgil.PFS
         public void SaveSessionState(SessionState sessionState, string cardId)
         {
             this.sessionStateHolder.Save(JsonSerializer.Serialize(sessionState), cardId);
-        }
-        
-        public void DeleteAllSessionStates()
-        {
-            this.sessionStateHolder.DeleteAll();
         }
 
         private SessionState TryDeserializeSessionState(string data)

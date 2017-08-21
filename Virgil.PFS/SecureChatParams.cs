@@ -18,15 +18,25 @@ namespace Virgil.PFS
         public SecureChatParams(ICrypto crypto,
             CardModel identityCard,
             IPrivateKey identityPrivateKey,
-            ServiceInfo serviceInfo
+            ServiceInfo serviceInfo,
+            int sessionToBeAliveDays = SessionToBeAliveDays,
+            int longTermPrivateKeyToBeAliveDays = LongTermPrivateKeyToBeAliveDays
             )
         {
             this.Crypto = crypto;
             this.IdentityPrivateKey = identityPrivateKey;
             this.IdentityCard = identityCard;
             this.ServiceInfo = serviceInfo;
-            this.SessionLifeDays = SessionToBeAliveDays;
-            this.LtPrivateKeyLifeDays = LongTermPrivateKeyToBeAliveDays;
+            if (longTermPrivateKeyToBeAliveDays < sessionToBeAliveDays)
+            {
+                throw new Exception("Sorry! Long term private key can't live less than session.");
+            }
+            if (sessionToBeAliveDays < 1)
+            {
+                throw new Exception("Very short session's lifetime.");
+            }
+            this.LtPrivateKeyLifeDays = longTermPrivateKeyToBeAliveDays;
+            this.SessionLifeDays = sessionToBeAliveDays;
         }
 
         public SecureChatParams(ICrypto crypto,
@@ -42,14 +52,12 @@ namespace Virgil.PFS
                 {
                     AccessToken = accessToken,
                     Address = "https://pfs.virgilsecurity.com"
-                })
+                },
+            sessionToBeAliveDays,
+            longTermPrivateKeyToBeAliveDays
+            )
         {
-            if (longTermPrivateKeyToBeAliveDays < sessionToBeAliveDays)
-            {
-                throw new Exception("Sorry! Long term private key can't live less than session.");
-            }
-            this.LtPrivateKeyLifeDays = longTermPrivateKeyToBeAliveDays;
-            this.SessionLifeDays = sessionToBeAliveDays;
+ 
         }
     }
 }

@@ -52,7 +52,7 @@ namespace Virgil.PFS
         {
             var cardIds = new List<string>();
 
-            var paths = Array.FindAll(this.keyStorage.Names(), s => s.Contains(this.StoragePrefix()));
+            var paths = Array.FindAll(this.keyStorage.Names(), s => s.Contains(this.StoragePrefixForCurrentOwner()));
 
             foreach (var path in paths)
             {

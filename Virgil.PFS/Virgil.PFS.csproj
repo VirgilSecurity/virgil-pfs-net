@@ -51,6 +51,7 @@
     <Compile Include="Client\EphemeralCardsRequest.cs" />
     <Compile Include="Client\Connection\PfsServiceResponseErrorHandler.cs" />
     <Compile Include="Client\Connection\IResponseErrorHandler.cs" />
+    <Compile Include="Session\SessionStateHolder.cs" />
     <Compile Include="Utils\JsonSerializer.cs" />
     <Compile Include="Client\Models\CredentialsModel.cs" />
     <Compile Include="Client\Models\RequestModels\EphemeralCardRequestMetaModel.cs" />

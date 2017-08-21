@@ -12,7 +12,7 @@ using Virgil.SDK.Cryptography;
 
 namespace Virgil.PFS
 {
-    class SecureSessionInitiator : SecureSession
+    public class SecureSessionInitiator : SecureSession
     {
 
         private CardModel myIdentityCard;
@@ -30,7 +30,6 @@ namespace Virgil.PFS
             CredentialsModel recipientCredentials,
             CardModel recipientIdentityCard,
             byte[] additionalData,
-            SecureSessionHelper sessionHelper,
             DateTime expiredAt,
             bool recovered = false
             )
@@ -41,9 +40,7 @@ namespace Virgil.PFS
             this.myEphKeyName = myEphKeyName;
             this.recipientCredentials = recipientCredentials;
             this.recipientIdentityCard = recipientIdentityCard;
-            // todo change
-            //this.sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id);
-            this.sessionHelper = sessionHelper;
+            this.sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id);
             if (recovered)
             {
             this.InitializeSession();

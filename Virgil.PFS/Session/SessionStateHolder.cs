@@ -1,0 +1,87 @@
+﻿using Virgil.PFS.Client;
+using Virgil.SDK.Storage;
+
+namespace Virgil.PFS
+{
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using Virgil.PFS;
+
+    internal class SessionStateHolder : ISessionStateHolder
+    {
+        private readonly string folderPath;
+        protected IKeyStorage keyStorage;
+        private const string sessionFolder = "Sessions";
+        protected string ownerId;
+
+
+        public SessionStateHolder(string ownerCardId)
+        {
+             this.keyStorage = new DefaultKeyStorage($"{sessionFolder}\\{ownerCardId}", false);
+            this.ownerId = ownerCardId;
+        }
+
+        public string Load(string cardId)
+        {
+            if (!this.Exists(cardId))
+            {
+                throw new Exception("Session state is not found."); //todo virgil exception
+            }
+            var entry = this.keyStorage.Load(cardId);
+            return Encoding.UTF8.GetString(entry.Value, 0, entry.Value.Count());
+        }
+
+        public string[] LoadAll()
+        {
+            var cardIds = this.keyStorage.Names();
+            List<string> sessionStates = new List<string>();
+
+            foreach (var cardId in cardIds)
+            {
+                sessionStates.Add(this.Load(cardId));
+            }
+            return sessionStates.ToArray();
+        }
+
+        public string[] LoadAllNames()
+        {
+            return this.keyStorage.Names();
+        }
+
+        public bool Exists(string cardId)
+        {
+            return this.keyStorage.Exists(cardId);
+        }
+
+        public void Save(string sessionStateJson, string cardId)
+        {
+            var keyEntry = new KeyEntry
+            {
+                Name = cardId,
+                Value = Encoding.UTF8.GetBytes(sessionStateJson)
+            };
+            this.keyStorage.Store(keyEntry);
+        }
+
+        public void Delete(string cardId)
+        {
+            if (!this.Exists(cardId))
+            {
+                throw new Exception("Session state is not found."); //todo virgil exception
+            }
+
+            this.keyStorage.Delete(cardId);
+        }
+
+
+        private string GetSessionStatePath(string alias)
+        {
+            return Path.Combine(this.folderPath, alias.ToLower());
+        }
+
+    }
+}
+

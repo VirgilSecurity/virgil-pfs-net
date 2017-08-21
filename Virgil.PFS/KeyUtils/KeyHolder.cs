@@ -31,7 +31,7 @@ namespace Virgil.PFS
             return $"v.{this.ownerId}";
         }
 
-        private string StoragePrefixForCurrentOwner()
+        protected string StoragePrefixForCurrentOwner()
         {
             return this.OwnerPrefixName() + this.StoragePrefix();
         }
@@ -79,6 +79,15 @@ namespace Virgil.PFS
                 result.Add(cardId, privateKey);
             }
             return result;
+        }
+
+        public void RemoveAllKeys()
+        {
+            var keyPaths = Array.FindAll(this.keyStorage.Names(), s => s.Contains(this.StoragePrefixForCurrentOwner()));
+            foreach (var keyPath in keyPaths)
+            {
+                this.keyStorage.Delete(keyPath);
+            }
         }
 
         public bool HasKeys()
