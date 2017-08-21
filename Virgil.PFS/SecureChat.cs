@@ -143,7 +143,6 @@ namespace Virgil.PFS
                         throw new SecureSessionException(
                             "Exist session for given recipient. Try to loadUpSession");
                     }
-
                 }
             }
         }
@@ -273,7 +272,6 @@ namespace Virgil.PFS
                 true
             );
             return secureSession;
-
         }
 
         private SecureSessionResponder RecoverSessionResponder(ResponderSessionState sessionState)
