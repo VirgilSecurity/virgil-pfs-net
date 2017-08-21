@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virgil.PFS.Client;
+using Virgil.PFS.Exceptions;
 using Virgil.SDK.Client;
 using Virgil.SDK.Common;
 using Virgil.SDK.Cryptography;
@@ -102,13 +103,13 @@ namespace Virgil.PFS
 
             if (credentials.LTCard == null && credentials.OTCard == null)
             {
-                throw new Exception("Error obtaining recipient cards set. Empty set.");
+                throw new CredentialsException("Error obtaining recipient cards set. Empty set.");
             }
 
             if (!validator.Validate(credentials.LTCard) ||
                 (credentials.OTCard != null && !validator.Validate(credentials.OTCard)))
             {
-                throw new Exception("One of responder ephemeral card validation failed.");
+                throw new CredentialsException("One of responder ephemeral card validation failed.");
             }
 
             return credentials;

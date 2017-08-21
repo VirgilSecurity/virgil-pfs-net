@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Virgil.Crypto.Pfs;
-using Virgil.PFS.Client;
-using Virgil.SDK.Client;
-using Virgil.SDK.Cryptography;
-
-namespace Virgil.PFS
+﻿namespace Virgil.PFS
 {
+    using System;
+    using Virgil.Crypto.Pfs;
+    using Virgil.PFS.Exceptions;
+    using Virgil.SDK.Client;
+    using Virgil.SDK.Cryptography;
+
     public class SecureSessionResponder : SecureSession
     {
         private CardModel initiatorIdentityCard;
@@ -68,7 +62,8 @@ namespace Virgil.PFS
         {
             if (message.InitiatorIcId != this.initiatorIdentityCard.Id)
             {
-                throw new Exception("Initiator identity card id for this session and InitiationMessage doesn't match.");
+                throw new SecureSessionResponderException(
+                    "Initiator identity card id for this session and InitiationMessage doesn't match.");
             }
         }
 
@@ -79,7 +74,7 @@ namespace Virgil.PFS
                 this.crypto.ImportPublicKey(this.initiatorIdentityCard.SnapshotModel.PublicKeyData);
             if (!this.crypto.Verify(message.EphPublicKey, message.EphPublicKeySignature, initiatorPublicKey))
             {
-                throw new Exception("Error validating initiator signature.");
+                throw new SecureSessionResponderException("Error validating initiator signature.");
             }
         }
 
@@ -166,7 +161,7 @@ namespace Virgil.PFS
             {
                 if (!this.IsInitialized())
                 {
-                    throw new Exception("Session is not initialized!"); //todo VirgilSession exception
+                    throw new SecureSessionResponderException("Session is not initialized!");
                 }
                 var message = MessageHelper.ExtractMessage(encryptedMessage);
                 return base.Decrypt(message);

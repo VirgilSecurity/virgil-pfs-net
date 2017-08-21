@@ -1,4 +1,5 @@
 ﻿using System;
+using Virgil.PFS.Exceptions;
 using Virgil.SDK.Client;
 using Virgil.SDK.Cryptography;
 
@@ -29,11 +30,12 @@ namespace Virgil.PFS
             this.ServiceInfo = serviceInfo;
             if (longTermPrivateKeyToBeAliveDays < sessionToBeAliveDays)
             {
-                throw new Exception("Sorry! Long term private key can't live less than session.");
+                throw new SecureSessionHolderException(
+                    "Sorry! Long term private key can't live less than session.");
             }
             if (sessionToBeAliveDays < 1)
             {
-                throw new Exception("Very short session's lifetime.");
+                throw new SecureSessionHolderException("Very short session's lifetime.");
             }
             this.LtPrivateKeyLifeDays = longTermPrivateKeyToBeAliveDays;
             this.SessionLifeDays = sessionToBeAliveDays;

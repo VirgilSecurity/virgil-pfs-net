@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virgil.PFS;
-using Virgil.PFS.Client;
-
-namespace Virgil.PFS
+﻿namespace Virgil.PFS
 {
+    using System;
+    using System.Collections.Generic;
+    using Virgil.PFS.Client;
+    using Virgil.PFS.Exceptions;
+
     public class SecureSessionHelper
     {
         private string ownerCardId;
@@ -118,7 +115,7 @@ namespace Virgil.PFS
                 }
                 catch (Exception)
                 {
-                    throw new Exception("Corrupted saved session state"); //todo virgil exception
+                    throw new SecureSessionHolderException("Corrupted saved session state"); 
                 }
             }
         }

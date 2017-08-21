@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virgil.PFS.Client;
+using Virgil.PFS.Exceptions;
 
 namespace Virgil.PFS
 {
@@ -52,7 +53,7 @@ namespace Virgil.PFS
             var msg = TryExtractInitialMessage(message);
             if (msg == null)
             {
-                throw new Exception("Wrong initial message format."); //todo virgil exception
+                throw new MessageExtractionException("Wrong initial message format.");
             }
             return msg;
         }
@@ -62,7 +63,7 @@ namespace Virgil.PFS
             Message msg = TryExtractMessage(message);
             if (msg == null)
             {
-                throw new Exception("Wrong message format."); //todo virgil exception
+                throw new MessageExtractionException("Wrong message format."); 
             }
             return msg;
         }

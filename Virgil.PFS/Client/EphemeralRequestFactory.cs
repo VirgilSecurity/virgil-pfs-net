@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Virgil.PFS.Client;
 using Virgil.PFS.Client.Models;
-using Virgil.SDK;
 using Virgil.SDK.Client;
 using Virgil.SDK.Common;
 using Virgil.SDK.Cryptography;

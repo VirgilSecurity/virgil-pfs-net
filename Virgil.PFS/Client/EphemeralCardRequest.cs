@@ -5,7 +5,6 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Virgil.PFS.Client.Models;
-using Virgil.SDK.Client;
 
 namespace Virgil.PFS.Client
 {

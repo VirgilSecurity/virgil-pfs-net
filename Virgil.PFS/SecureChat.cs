@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virgil.PFS.Client;
+using Virgil.PFS.Exceptions;
 using Virgil.PFS.KeyUtils;
 using Virgil.SDK.Client;
 using Virgil.SDK.Common;
@@ -140,7 +141,8 @@ namespace Virgil.PFS
                     }
                     else
                     {
-                        throw new Exception("Exist session for given recipient. Try to loadUpSession");
+                        throw new SecureSessionException(
+                            "Exist session for given recipient. Try to loadUpSession");
                     }
 
                 }
@@ -190,8 +192,7 @@ namespace Virgil.PFS
             }
             catch (Exception)
             {
-                //todo virgil exception
-                throw new Exception("Remove session exception.");
+                throw new SecureSessionHolderException("Remove session exception.");
             }
         }
 
@@ -252,7 +253,7 @@ namespace Virgil.PFS
                 }
                 else
                 {
-                    throw new Exception("Unknown session state");
+                    throw new SecureSessionHolderException("Unknown session state");
                 }
             }
         }

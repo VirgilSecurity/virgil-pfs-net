@@ -1,4 +1,5 @@
 ﻿using Virgil.PFS.Client;
+using Virgil.PFS.Exceptions;
 using Virgil.SDK.Storage;
 
 namespace Virgil.PFS
@@ -28,7 +29,7 @@ namespace Virgil.PFS
         {
             if (!this.Exists(cardId))
             {
-                throw new Exception("Session state is not found."); //todo virgil exception
+                throw new SecureSessionHolderException("Session state is not found.");
             }
             var entry = this.keyStorage.Load(cardId);
             return Encoding.UTF8.GetString(entry.Value, 0, entry.Value.Count());
@@ -70,7 +71,7 @@ namespace Virgil.PFS
         {
             if (!this.Exists(cardId))
             {
-                throw new Exception("Session state is not found."); //todo virgil exception
+                throw new SecureSessionHolderException("Session state is not found.");
             }
 
             this.keyStorage.Delete(cardId);

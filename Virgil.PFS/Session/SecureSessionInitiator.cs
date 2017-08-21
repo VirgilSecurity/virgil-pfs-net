@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virgil.Crypto.Pfs;
-using Virgil.PFS.Client;
-using Virgil.PFS.KeyUtils;
-using Virgil.SDK;
-using Virgil.SDK.Client;
-using Virgil.SDK.Cryptography;
-
-namespace Virgil.PFS
+﻿namespace Virgil.PFS
 {
+    using System;
+    using Virgil.Crypto.Pfs;
+    using Virgil.PFS.Client;
+    using Virgil.PFS.Exceptions;
+    using Virgil.PFS.KeyUtils;
+    using Virgil.SDK;
+    using Virgil.SDK.Client;
+    using Virgil.SDK.Cryptography;
+
     public class SecureSessionInitiator : SecureSession
     {
 
@@ -165,8 +162,7 @@ namespace Virgil.PFS
         {
             if (!this.IsInitialized())
             {
-                //todo SecureSessionExeption
-                throw new Exception("Session is not initialized.");
+                throw new SecureSessionInitiatorException("Session is not initialized.");
             }
             var msg = MessageHelper.ExtractMessage(message);
             return base.Decrypt(msg);
