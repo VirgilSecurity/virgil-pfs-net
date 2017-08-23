@@ -32,7 +32,7 @@ namespace Virgil.PFS
         public async Task BootstrapCardsSet(CardModel identityCard, IPrivateKey identityKey, int desireNumberOfCards)
         {
             EphemeralCardParams longTermCardParams = null;
-            if (!this.keyHelper.LtKeyHolder().HasKeys())
+            if (this.keyHelper.LtKeyHolder().IsWaitingForNewKey())
             {
                 var longTermKeys = crypto.GenerateKeys();
                 var longTermCardId = this.GetCardId(identityCard.SnapshotModel.Identity, longTermKeys.PublicKey);

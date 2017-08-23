@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Virgil.SDK.Cryptography;
 using Virgil.SDK.Storage;
 
@@ -25,7 +26,8 @@ namespace Virgil.PFS
         {
             var meta = new Dictionary<string, string>
             {
-                {expiredFieldName, GetTimestamp(DateTime.Now.AddDays(this.ltPrivateKeyLifeDays))}
+                //lt key should live one extra day
+                {expiredFieldName, GetTimestamp(DateTime.Now.AddDays(this.ltPrivateKeyLifeDays + 1))}
             };
             var keyEntry = new KeyEntry
             {
@@ -36,7 +38,10 @@ namespace Virgil.PFS
             this.keyStorage.Store(keyEntry);
         }
 
-
+        public bool IsWaitingForNewKey()
+        {
+            return !this.AllKeys().Values.Any(x => (DateTime.Now < ((DateTime) x.ExpiredAt).AddDays(-1)));
+        }
         public string[] RemoveExpiredKeys()
         {
             var cardIds = new List<string>();
@@ -47,8 +52,8 @@ namespace Virgil.PFS
             {
                 var key = this.keyStorage.Load(path);
                 var expiredAt = GetDateTime(key.MetaData[this.expiredFieldName]);
-
-                if (DateTime.Now > expiredAt)
+                
+                if (DateTime.Now >= expiredAt)
                 {
                     cardIds.Add(key.Name);
                     this.keyStorage.Delete(path);
