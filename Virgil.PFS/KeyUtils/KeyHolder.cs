@@ -16,6 +16,7 @@ namespace Virgil.PFS
         protected IKeyStorage keyStorage;
         protected ICrypto crypto;
         protected string ownerId;
+        protected string expiredFieldName = "expired_at";
 
         protected KeyHolder(ICrypto crypto, string ownerCardId)
         {
@@ -66,17 +67,23 @@ namespace Virgil.PFS
             return this.crypto.ImportPrivateKey(key.Value);
         }
 
-        public Dictionary<string, IPrivateKey> AllKeys()
+        public Dictionary<string, KeyInfo> AllKeys()
         {
             var keyPaths = Array.FindAll(this.keyStorage.Names(), s => s.Contains(this.StoragePrefixForCurrentOwner()));
             var keys = new List<IPrivateKey>();
-            var result = new Dictionary<string, IPrivateKey>();
+            var result = new Dictionary<string, KeyInfo>();
             foreach (var keyPath in keyPaths)
             {
                 var key = this.keyStorage.Load(keyPath);
-                var privateKey = this.crypto.ImportPrivateKey(key.Value);
-                var cardId = key.Name.Split(new string[] { this.StoragePrefix()}, StringSplitOptions.None).Last();
-                result.Add(cardId, privateKey);
+                var keyInfo = new KeyInfo()
+                {
+                    PrivateKey = this.crypto.ImportPrivateKey(key.Value),
+                    ExpiredAt = (key.MetaData[this.expiredFieldName] == null) ?
+                    null :
+                    GetDateTime(key.MetaData[this.expiredFieldName])
+                };
+                var cardId = key.Name.Split(new string[] { this.StoragePrefix() }, StringSplitOptions.None).Last();
+                result.Add(cardId, keyInfo);
             }
             return result;
         }
@@ -96,5 +103,21 @@ namespace Virgil.PFS
             return (keyPaths.Length > 0);
         }
 
+        protected static string GetTimestamp(DateTime value)
+        {
+            return value.ToString("yyyyMMddHHmmssfff");
+        }
+
+        protected static DateTime? GetDateTime(string timestamp)
+        {
+            return DateTime.ParseExact(timestamp, "yyyyMMddHHmmssfff", null);
+        }
+
+    }
+
+    internal class KeyInfo
+    {
+        public IPrivateKey PrivateKey;
+        public DateTime? ExpiredAt;
     }
 }

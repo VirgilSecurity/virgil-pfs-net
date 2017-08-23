@@ -57,7 +57,9 @@
     <Compile Include="Exceptions\SecureSessionInitiatorException.cs" />
     <Compile Include="Exceptions\SecureSessionResponderException.cs" />
     <Compile Include="Exceptions\SecureSessionHolderException.cs" />
+    <Compile Include="Session\IUserDataStorage.cs" />
     <Compile Include="Session\SessionStateHolder.cs" />
+    <Compile Include="Session\UserDataStorage.cs" />
     <Compile Include="Utils\JsonSerializer.cs" />
     <Compile Include="Client\Models\CredentialsModel.cs" />
     <Compile Include="Client\Models\RequestModels\EphemeralCardRequestMetaModel.cs" />

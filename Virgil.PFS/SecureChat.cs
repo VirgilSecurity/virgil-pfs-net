@@ -32,13 +32,10 @@ namespace Virgil.PFS
             this.keyHelper = new SecureChatKeyHelper(crypto, this.myIdentityCard.Id, parameters.LtPrivateKeyLifeDays);
             this.cardManager = new EphemeralCardManager(this.crypto, this.keyHelper, parameters.ServiceInfo);
             this.sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id);
-
             this.sessionExpireTime = DateTime.Now.AddDays(this.parameters.SessionLifeDays);
-
-
         }
 
-        public async Task InitializeAsync(int desireNumberOfCards = 10)
+        public async Task RotateKeysAsync(int desireNumberOfCards = 10)
         {
             this.Cleanup();
             await cardManager.BootstrapCardsSet(this.myIdentityCard, this.myPrivateKey, desireNumberOfCards);
@@ -93,7 +90,7 @@ namespace Virgil.PFS
 
         private async Task RemoveExhaustedOtKeys()
         {
-            //remove exhausted otcards, which don't belong to any session states
+            //remove exhausted otcards, which don't belong to any session states more than 1 day
             var otKeys = this.keyHelper.OtKeyHolder().AllKeys();
 
             var exhaustedOtCardIds = await this.cardManager.ValidateOtCards(this.myIdentityCard.Id, otKeys.Keys);
@@ -101,7 +98,17 @@ namespace Virgil.PFS
                 .ToDictionary(p => p.Key, p => p.Value);
             foreach (var otKey in otKeysToBeRemoved)
             {
-                this.keyHelper.OtKeyHolder().RemoveKey(otKey.Key);
+                if (otKey.Value.ExpiredAt == null)
+                {
+                    this.keyHelper.OtKeyHolder().SetUpExpiredAt(otKey.Key);
+                }
+                else
+                {
+                    if (otKey.Value.ExpiredAt <= DateTime.Now)
+                    {
+                        this.keyHelper.OtKeyHolder().RemoveKey(otKey.Key);
+                    }
+                }
             }
         }
 

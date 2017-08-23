@@ -11,7 +11,6 @@ namespace Virgil.PFS
     internal class LtKeyHolder : KeyHolder
     {
         private readonly int ltPrivateKeyLifeDays;
-        private string expiredFieldName = "expired_at";
         public LtKeyHolder(ICrypto crypto, string ownerCardId, int ltKeyLifeDays) : base(crypto, ownerCardId)
         {
             this.ltPrivateKeyLifeDays = ltKeyLifeDays;
@@ -37,16 +36,6 @@ namespace Virgil.PFS
             this.keyStorage.Store(keyEntry);
         }
 
-
-        private static string GetTimestamp(DateTime value)
-        {
-            return value.ToString("yyyyMMddHHmmssfff");
-        }
-
-        private static DateTime GetDateTime(string timestamp)
-        {
-            return DateTime.ParseExact(timestamp, "yyyyMMddHHmmssfff", null);
-        }
 
         public string[] RemoveExpiredKeys()
         {
