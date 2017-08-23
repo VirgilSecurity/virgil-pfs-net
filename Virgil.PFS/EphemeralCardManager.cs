@@ -29,7 +29,12 @@ namespace Virgil.PFS
 
         }
 
-        public async Task BootstrapCardsSet(CardModel identityCard, IPrivateKey identityKey, int desireNumberOfCards)
+        public async Task<OTCsCountModel> GetOtCardsCount(string identityCardId)
+        {
+            return await this.client.GetOtCardsCount(identityCardId);
+        }
+
+        public async Task BootstrapCardsSet(CardModel identityCard, IPrivateKey identityKey, int numberOfCards)
         {
             EphemeralCardParams longTermCardParams = null;
             if (this.keyHelper.LtKeyHolder().IsWaitingForNewKey())
@@ -45,36 +50,34 @@ namespace Virgil.PFS
                 };
             }
             //get otcard size
-            var otCardsCount = await this.client.GetOTCardsCount(identityCard.Id);
+
             List<EphemeralCardParams> oneTimeCardParamsList = new List<EphemeralCardParams>();
 
             var cardSigner = new CardSigner() { CardId = identityCard.Id, PrivateKey = identityKey };
 
-            if (desireNumberOfCards > otCardsCount.Active)
+            for (var i = 0; i < numberOfCards; i++)
             {
-                for (var i = 0; i <= (desireNumberOfCards - otCardsCount.Active); i++)
+                var oneTimeKeyPair = crypto.GenerateKeys();
+                var oneTimeCardId = this.GetCardId(identityCard.SnapshotModel.Identity, oneTimeKeyPair.PublicKey);
+
+                this.keyHelper.OtKeyHolder().SaveKeyByName(oneTimeKeyPair.PrivateKey, oneTimeCardId);
+
+                var oneTimeCardParams = new EphemeralCardParams()
                 {
-                    var oneTimeKeyPair = crypto.GenerateKeys();
-                    var oneTimeCardId = this.GetCardId(identityCard.SnapshotModel.Identity, oneTimeKeyPair.PublicKey);
-
-                    this.keyHelper.OtKeyHolder().SaveKeyByName(oneTimeKeyPair.PrivateKey, oneTimeCardId);
-
-                    var oneTimeCardParams = new EphemeralCardParams()
-                    {
-                        Identity = identityCard.SnapshotModel.Identity,
-                        PublicKey = oneTimeKeyPair.PublicKey
-                    };
-                    oneTimeCardParamsList.Add(oneTimeCardParams);
-                }
-
+                    Identity = identityCard.SnapshotModel.Identity,
+                    PublicKey = oneTimeKeyPair.PublicKey
+                };
+                oneTimeCardParamsList.Add(oneTimeCardParams);
             }
+
+
 
             if (longTermCardParams != null)
             {
                 var createCardsRequest = factory.CreateEphemeralCardsRequest(
                     longTermCardParams,
                     oneTimeCardParamsList.ToArray(),
-                    new CardSigner[] {cardSigner}
+                    new CardSigner[] { cardSigner }
                 );
 
                 await this.client.CreateRecipientAsync(identityCard.Id, createCardsRequest);
@@ -88,7 +91,7 @@ namespace Virgil.PFS
                         oneTimeCardParamsList.ToArray(),
                         new CardSigner[] { cardSigner }
                     );
-                    await this.client.CreateOTCardsAsync(identityCard.Id, createCardsRequest);
+                    await this.client.CreateOtCardsAsync(identityCard.Id, createCardsRequest);
                 }
             }
 
@@ -97,7 +100,7 @@ namespace Virgil.PFS
         public async Task<CredentialsModel> GetCredentialsByIdentityCard(CardModel identityCard)
         {
             var credentials = (await this.client.SearchCredentialsByIds(new String[] { identityCard.Id })).FirstOrDefault();
-           
+
             var validator = new EphemeralCardValidator(this.crypto);
             validator.AddVerifier(identityCard.Id, identityCard.SnapshotModel.PublicKeyData);
 

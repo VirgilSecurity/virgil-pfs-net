@@ -53,7 +53,7 @@ namespace Virgil.PFS
             return recipientModel;
         }
         
-        public async Task<CardModel> CreateLTCardAsync(string identityCardId, EphemeralCardsRequest request)
+        public async Task<CardModel> CreateLtCardAsync(string identityCardId, EphemeralCardsRequest request)
         {
             var req = HttpRequest.Create(HttpRequestMethod.Post)
              .WithEndpoint($"/v1/recipient/{identityCardId}/actions/push-ltc")
@@ -63,7 +63,7 @@ namespace Virgil.PFS
             return cardModel;
         }
 
-        public async Task<List<CardModel>> CreateOTCardsAsync(string identityCardId, EphemeralCardsRequest request)
+        public async Task<List<CardModel>> CreateOtCardsAsync(string identityCardId, EphemeralCardsRequest request)
         {
             var req = HttpRequest.Create(HttpRequestMethod.Post)
                 .WithEndpoint($"/v1/recipient/{identityCardId}/actions/push-otcs")
@@ -74,7 +74,7 @@ namespace Virgil.PFS
             return cardModel;
         }
 
-        public async Task<OTCsCountModel> GetOTCardsCount(string identityCardId)
+        public async Task<OTCsCountModel> GetOtCardsCount(string identityCardId)
         {
             var req = HttpRequest.Create(HttpRequestMethod.Post)
                .WithEndpoint($"/v1/recipient/{identityCardId}/actions/count-otcs").WithBody("");

@@ -9,6 +9,7 @@ using Virgil.PFS.KeyUtils;
 using Virgil.SDK.Client;
 using Virgil.SDK.Common;
 using Virgil.SDK.Cryptography;
+using Virgil.SDK.Exceptions;
 
 namespace Virgil.PFS
 {
@@ -38,7 +39,16 @@ namespace Virgil.PFS
         public async Task RotateKeysAsync(int desireNumberOfCards = 10)
         {
             this.Cleanup();
-            await cardManager.BootstrapCardsSet(this.myIdentityCard, this.myPrivateKey, desireNumberOfCards);
+            var numberOfOtCard = await this.cardManager.GetOtCardsCount(this.myIdentityCard.Id);
+            if (desireNumberOfCards > numberOfOtCard.Active)
+            {
+                await cardManager.BootstrapCardsSet(
+                    this.myIdentityCard,
+                    this.myPrivateKey,
+                    (desireNumberOfCards - numberOfOtCard.Active)
+                    );
+
+            }
         }
 
         private async void Cleanup()
@@ -202,11 +212,21 @@ namespace Virgil.PFS
         }
 
 
-        public SecureSession LoadUpSession(CardModel recipientCard, string msg, byte[] additionalData = null)
+        public async Task<SecureSession> LoadUpSession(CardModel recipientCard, string msg, byte[] additionalData = null)
         {
             if (MessageHelper.IsInitialMessage(msg))
             {
                 var initialMessage = MessageHelper.ExtractInitialMessage(msg);
+
+                // Added new one time card
+                try
+                {
+                    await this.cardManager.BootstrapCardsSet(this.myIdentityCard, this.myPrivateKey, 1);
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
 
                 var sessionResponder = new SecureSessionResponder(
                     this.crypto,
