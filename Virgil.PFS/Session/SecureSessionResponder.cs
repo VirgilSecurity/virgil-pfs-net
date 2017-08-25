@@ -1,4 +1,6 @@
-﻿namespace Virgil.PFS
+﻿using Virgil.PFS.Session;
+
+namespace Virgil.PFS
 {
     using System;
     using Virgil.Crypto.Pfs;
@@ -9,28 +11,37 @@
     public class SecureSessionResponder : SecureSession
     {
         private CardModel initiatorIdentityCard;
-        private SecureChatKeyHelper keyHelper;
-        private SecureSessionHelper sessionHelper;
 
-        public SecureSessionResponder(ICrypto crypto, IPrivateKey myPrivateKey, CardModel myIdentityCard,
-            CardModel initiatorIdentityCard, byte[] additionalData,
-            SecureChatKeyHelper keyHelper, DateTime expiredAt, bool recovered = false) :
-            base(crypto, myPrivateKey, recovered, expiredAt, additionalData)
+        public SecureSessionResponder(
+            ICrypto crypto,
+            IPrivateKey myPrivateKey,
+            CardModel myIdentityCard,
+            CardModel initiatorIdentityCard,
+            byte[] additionalData,
+            SecureChatKeyHelper keyHelper,
+            SecureSessionHelper sessionHelper,
+            DateTime expiredAt,
+            bool recovered = false) :
+            base(crypto, myPrivateKey, recovered, expiredAt, keyHelper, sessionHelper, initiatorIdentityCard.Id, additionalData)
         {
             this.initiatorIdentityCard = initiatorIdentityCard;
-            this.keyHelper = keyHelper;
-            this.sessionHelper = new SecureSessionHelper(myIdentityCard.Id);
-            
         }
 
-        public SecureSessionResponder(ICrypto crypto, IPrivateKey myPrivateKey, CardModel myIdentityCard,
-            CardModel initiatorIdentityCard, byte[] additionalData,
-            SecureChatKeyHelper keyHelper, 
-            byte[] initiatorEphPublicKeyData, string responderLtcId, string responderOtcId, DateTime expiredAt) :
+        public SecureSessionResponder(ICrypto crypto,
+            IPrivateKey myPrivateKey,
+            CardModel myIdentityCard,
+            CardModel initiatorIdentityCard,
+            byte[] additionalData,
+            SecureChatKeyHelper keyHelper,
+            SecureSessionHelper sessionHelper,
+            byte[] initiatorEphPublicKeyData,
+            string responderLtcId,
+            string responderOtcId,
+            DateTime expiredAt) :
             this(crypto, myPrivateKey, myIdentityCard, initiatorIdentityCard, additionalData,
-            keyHelper, expiredAt, true)
+            keyHelper, sessionHelper, expiredAt, true)
         {
-            this.InitializeSession(initiatorEphPublicKeyData, responderLtcId, responderOtcId );
+            this.InitializeSession(initiatorEphPublicKeyData, responderLtcId, responderOtcId);
         }
 
         internal string Decrypt(InitialMessage encryptedMessage)
@@ -39,10 +50,9 @@
             {
                 this.InitializeSession(encryptedMessage);
             }
-            var sessionId = this.pfs.GetSession().GetIdentifier();
             var message = new Message()
             {
-                SessionId = sessionId,
+                SessionId = this.CoreSession.GetSessionId(),
                 CipherText = encryptedMessage.CipherText,
                 Salt = encryptedMessage.Salt
             };
@@ -89,65 +99,28 @@
             var initiatorEphPublicKey = new VirgilPFSPublicKey(initiatorEphPublicKeyData);
             VirgilPFSPrivateKey pfsOtPrivateKey = null;
             if (responderOtcId != null)
-            { 
+            {
                 var myOtPrivateKeyData = this.crypto.ExportPrivateKey(
                     this.keyHelper.OtKeyHolder().LoadKeyByName(responderOtcId));
                 pfsOtPrivateKey = new VirgilPFSPrivateKey(myOtPrivateKeyData);
             }
-            var session = this.StartResponderSession(pfsOtPrivateKey, 
-                initiatorIdentityPublicKey, 
-                initiatorEphPublicKey, 
-                pfsPrivateKey, 
-                pfsLtPrivateKey);
+
+            this.CoreSession = new CoreSession(pfsOtPrivateKey,
+                initiatorIdentityPublicKey,
+                initiatorEphPublicKey,
+                pfsPrivateKey,
+                pfsLtPrivateKey,
+                additionalData);
+
 
             if (!this.isRecovered)
             {
-                SaveSessionState(initiatorEphPublicKeyData, responderLtcId, responderOtcId, session);
+                if (this.keyHelper.OtKeyHolder().IsKeyExist(responderOtcId))
+                {
+                    this.keyHelper.OtKeyHolder().RemoveKey(responderOtcId);
+                }
+                this.SaveCoreSessionData();
             }
-        }
-
-        private VirgilPFSSession StartResponderSession(VirgilPFSPrivateKey pfsOtPrivateKey, 
-            VirgilPFSPublicKey initiatorIdentityPublicKey,
-            VirgilPFSPublicKey initiatorEphPublicKey, 
-            VirgilPFSPrivateKey pfsPrivateKey, 
-            VirgilPFSPrivateKey pfsLtPrivateKey)
-        {
-            var initiatorPublicInfo = new VirgilPFSInitiatorPublicInfo(initiatorIdentityPublicKey, initiatorEphPublicKey);
-            VirgilPFSResponderPrivateInfo responderPrivateInfo = null;
-            responderPrivateInfo = (pfsOtPrivateKey == null) ? 
-                new VirgilPFSResponderPrivateInfo(pfsPrivateKey, pfsLtPrivateKey) : 
-                new VirgilPFSResponderPrivateInfo(pfsPrivateKey, pfsLtPrivateKey, pfsOtPrivateKey);
-
-            if (this.additionalData == null)
-            {
-                return this.pfs.StartResponderSession(responderPrivateInfo, initiatorPublicInfo);
-            }
-            else
-            {
-                return this.pfs.StartResponderSession(responderPrivateInfo, initiatorPublicInfo, this.additionalData);
-            }
-        }
-
-
-        private void SaveSessionState(byte[] initiatorEphPublicKeyData, string responderLtcId, string responderOtcId,
-            VirgilPFSSession session)
-        {
-            var sessionId = session.GetIdentifier();
-            var sessionState = new ResponderSessionState(sessionId,
-                this.createdAt,
-                this.expiredAt,
-                this.additionalData,
-                initiatorEphPublicKeyData,
-                this.initiatorIdentityCard,
-                responderLtcId,
-                responderOtcId);
-
-            if (this.sessionHelper.ExistSessionState(this.initiatorIdentityCard.Id))
-            {
-                this.sessionHelper.DeleteSessionState(this.initiatorIdentityCard.Id);
-            }
-
-            this.sessionHelper.SaveSessionState(sessionState, this.initiatorIdentityCard.Id);
         }
 
         public override string Decrypt(string encryptedMessage)

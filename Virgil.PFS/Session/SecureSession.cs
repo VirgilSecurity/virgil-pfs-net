@@ -8,35 +8,45 @@ using System.Threading.Tasks;
 using Virgil.SDK.Cryptography;
 using Virgil.Crypto.Pfs;
 using Virgil.PFS.Client;
+using Virgil.PFS.KeyUtils;
+using Virgil.PFS.Session;
 using Virgil.SDK;
 using Virgil.SDK.Client;
 
 namespace Virgil.PFS
 {
-    public abstract class SecureSession
+    public abstract class SecureSession : ISession
     {
         protected ICrypto crypto;
         protected IPrivateKey myPrivateKey;
         protected DateTime createdAt;
         protected DateTime expiredAt;
-        protected VirgilPFS pfs;
         protected bool isRecovered;
         protected byte[] additionalData;
-
+        protected SecureSessionHelper sessionHelper;
+        protected SecureChatKeyHelper keyHelper;
+        protected string InterlocutorCardId;
+        protected CoreSession CoreSession;
+        //protected VirgilPFS pfs;
 
 
         public SecureSession(ICrypto crypto, 
             IPrivateKey myPrivateKey, 
             bool recovered, 
             DateTime expiredAt,
+            SecureChatKeyHelper keyHelper,
+            SecureSessionHelper sessionHelper,
+            string interlocutorCardId,
             byte[] additionalData)
         {
             this.crypto = crypto;
             this.myPrivateKey = myPrivateKey;
             this.createdAt = DateTime.Now;
             this.expiredAt = expiredAt;
-            this.pfs = new VirgilPFS();
             this.isRecovered = recovered;
+            this.sessionHelper = sessionHelper;
+            this.keyHelper = keyHelper;
+            this.InterlocutorCardId = interlocutorCardId;
             this.additionalData = additionalData;
         }
 
@@ -47,26 +57,16 @@ namespace Virgil.PFS
         }
         public bool IsInitialized()
         {
-            
-            return (this.pfs.GetSession() != null && !this.pfs.GetSession().IsEmpty());
+            return (this.CoreSession != null && this.CoreSession.IsInitialized());
         }
         public bool IsExpired()
         {
             return (DateTime.Now > this.expiredAt);
         }
 
-        public virtual string Encrypt(String message)
+        public virtual string Encrypt(string message)
         {
-            var msgData = VirgilBuffer.From(message).GetBytes();
-            var encryptedMessage = this.pfs.Encrypt(msgData);
-            var msg = new Message()
-            {
-                Salt = encryptedMessage.GetSalt(),
-                CipherText = encryptedMessage.GetCipherText(),
-                SessionId = encryptedMessage.GetSessionIdentifier()
-            };
-
-            return JsonSerializer.Serialize(msg);
+            return this.CoreSession.Encrypt(message);
         }
 
 
@@ -74,16 +74,22 @@ namespace Virgil.PFS
 
         public abstract string Decrypt(string encryptedMessage);
 
-
-        protected string Decrypt(Message msg)
+        protected void SaveCoreSessionData()
         {
-            var pfsEncryptedMessage = new VirgilPFSEncryptedMessage(
-                msg.SessionId,
-                msg.Salt,
-                msg.CipherText);
-            var msgData = pfs.Decrypt(pfsEncryptedMessage);
+            this.keyHelper.SessionKeyHolder().SaveKeyByName(this.CoreSession.GetKey(), this.CoreSession.GetSessionIdBase64());
+            
+            var sessionState = new SessionState(
+                this.CoreSession.GetSessionId(), 
+                this.createdAt,
+                this.expiredAt, 
+                this.additionalData);
+            this.sessionHelper.SaveSessionState(sessionState, InterlocutorCardId);
+        }
 
-            return VirgilBuffer.From(msgData).ToString(StringEncoding.Utf8);
+        public string Decrypt(Message msg)
+        {
+            return this.CoreSession.Decrypt(msg);
+
         }
 
     }

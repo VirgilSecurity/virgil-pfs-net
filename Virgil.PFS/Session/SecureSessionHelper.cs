@@ -20,62 +20,26 @@
         public SessionState GetSessionState(string cardId)
         {
             var sessionStateJson = this.sessionStateHolder.Load(cardId);
-            return this.TryDeserializeSessionState(sessionStateJson);
+            return JsonSerializer.Deserialize<SessionState>(sessionStateJson, true);
         }
 
-        public Result GetAllSessionStates()
-          {
-              var sessionStateNames = this.sessionStateHolder.LoadAllNames();
-              List<InitiatorStruct> initiatorSessionStates = new List<InitiatorStruct>();
-              List<ResponderStruct> responderSessionStates = new List<ResponderStruct>();
-
-              foreach (var sessionStateName in sessionStateNames)
-              {
-                  var sessionState = this.TryDeserializeSessionState(
-                      this.sessionStateHolder.Load(sessionStateName)
-                      );
-                  if (sessionState.GetType() == typeof(InitiatorSessionState))
-                  {
-                    var el = new InitiatorStruct()
-                    {
-                        CardId = sessionStateName,
-                        SessionState = (InitiatorSessionState)sessionState
-                    };
-                      initiatorSessionStates.Add(el);
-                  }
-                  else
-                  {
-                      var el = new ResponderStruct()
-                      {
-                          CardId = sessionStateName,
-                          SessionState = (ResponderSessionState)sessionState
-                      };
-                    responderSessionStates.Add(el);
-                  }
-              }
-              return new Result()
-              {
-                  Initiators = initiatorSessionStates,
-                  Responders = responderSessionStates
-              };
-
-          }
-
-        public List<ResponderSessionState> GetAllResponderSessionStates()
+        public List<SessionInfo> GetAllSessionStates()
         {
-            var sessionStateJsons = this.sessionStateHolder.LoadAll();
-            List<ResponderSessionState> responderSessionStates = new List<ResponderSessionState>();
-
-            foreach (var sessionStateJson in sessionStateJsons)
+            var sessionStates = new List<SessionInfo>();
+            foreach (var sessionStateName in this.GetAllSessionStateIds())
             {
-                var sessionState = this.TryDeserializeSessionState(sessionStateJson);
-                if (sessionState.GetType() == typeof(ResponderSessionState))
+                var sessionState = this.GetSessionState(sessionStateName);
+                var el = new SessionInfo()
                 {
-                    responderSessionStates.Add((ResponderSessionState)sessionState);
-                }
+                    CardId = sessionStateName,
+                    SessionState = sessionState
+                };
+                sessionStates.Add(el);
             }
-            return responderSessionStates;
+            return sessionStates;
+
         }
+
 
         public string[] GetAllSessionStateIds()
         {
@@ -97,46 +61,11 @@
             this.sessionStateHolder.Save(JsonSerializer.Serialize(sessionState), cardId);
         }
 
-        private SessionState TryDeserializeSessionState(string data)
+        public struct SessionInfo
         {
-            SessionState sessionState = null;
-
-            try
-            {
-                sessionState = JsonSerializer.Deserialize<InitiatorSessionState>(data, true);
-                return sessionState;
-            }
-            catch (Exception)
-            {
-                try
-                {
-                    sessionState = JsonSerializer.Deserialize<ResponderSessionState>(data, true);
-                    return sessionState;
-                }
-                catch (Exception)
-                {
-                    throw new SecureSessionHolderException("Corrupted saved session state"); 
-                }
-            }
+            public string CardId;
+            public SessionState SessionState;
         }
-    }
 
-    public struct Result
-    {
-        public List<InitiatorStruct> Initiators;
-        public List<ResponderStruct> Responders;
     }
-
-    public struct InitiatorStruct
-    {
-        public string CardId;
-        public InitiatorSessionState SessionState;
-    }
-
-    public struct ResponderStruct
-    {
-        public string CardId;
-        public ResponderSessionState SessionState;
-    }
-
 }

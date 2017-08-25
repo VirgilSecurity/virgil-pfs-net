@@ -34,5 +34,10 @@ namespace Virgil.PFS
             return (DateTime.Now > this.ExpiredAt);
         }
 
+        public string GetSessionIdBase64()
+        {
+            return Convert.ToBase64String(this.SessionId);
+        }
+
     }
 }

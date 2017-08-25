@@ -21,7 +21,7 @@ namespace Virgil.PFS
         {
             this.crypto = crypto;
             this.ownerCardId = ownerCardId;
-            this.sessionKeyHolder = new SessionKeyHolder(crypto, ownerCardId);
+            this.sessionKeyHolder = new SessionKeyHolder(ownerCardId);
             this.ltKeyHolder = new LtKeyHolder(crypto, ownerCardId, ltKeyLifeDays);
             this.otKeyHolder = new OtKeyHolder(crypto, ownerCardId);
         }

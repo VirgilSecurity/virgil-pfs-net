@@ -1,4 +1,7 @@
-﻿namespace Virgil.PFS
+﻿using System.Text;
+using Virgil.PFS.Session;
+
+namespace Virgil.PFS
 {
     using System;
     using Virgil.Crypto.Pfs;
@@ -17,7 +20,6 @@
         private CredentialsModel recipientCredentials;
         private string myEphKeyName;
         private CardModel recipientIdentityCard;
-        private SecureSessionHelper sessionHelper;
 
         public SecureSessionInitiator(ICrypto crypto,
             IPrivateKey myPrivateKey,
@@ -26,18 +28,19 @@
             string myEphKeyName,
             CredentialsModel recipientCredentials,
             CardModel recipientIdentityCard,
+            SecureChatKeyHelper keyHelper, 
+            SecureSessionHelper sessionHelper,
             byte[] additionalData,
             DateTime expiredAt,
             bool recovered = false
             )
-            : base(crypto, myPrivateKey, recovered, expiredAt, additionalData)
+            : base(crypto, myPrivateKey, recovered, expiredAt, keyHelper, sessionHelper, recipientIdentityCard.Id, additionalData)
         {
             this.myIdentityCard = myIdentityCard;
             this.myEphPrivateKey = myEphPrivateKey;
             this.myEphKeyName = myEphKeyName;
             this.recipientCredentials = recipientCredentials;
             this.recipientIdentityCard = recipientIdentityCard;
-            this.sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id);
             if (recovered)
             {
             this.InitializeSession();
@@ -63,56 +66,20 @@
                     new VirgilPFSPublicKey(this.recipientCredentials.OTCard.SnapshotModel.PublicKeyData);
             }
 
-            var session = this.StartInitiatorSession(recipientPfsPublicKey, 
-                recipientPfsLtPublicKey, 
-                recipientPfsOtPublicKey, 
-                pfsInitiatorPrivateInfo);
+            this.CoreSession = new CoreSession(
+                recipientPfsPublicKey,
+                recipientPfsLtPublicKey,
+                recipientPfsOtPublicKey,
+                pfsInitiatorPrivateInfo,
+                this.additionalData
+                );
+
             if (!this.isRecovered)
             {
-                var keyHolder = new SessionKeyHolder(crypto, this.myIdentityCard.Id);
-                keyHolder.SaveKeyByName(this.myEphPrivateKey, this.myEphKeyName);
-
-                SaveSessionState(session);
+               this.SaveCoreSessionData();
             }
         }
-
-        private VirgilPFSSession StartInitiatorSession(
-            VirgilPFSPublicKey recipientPfsPublicKey,
-            VirgilPFSPublicKey recipientPfsLtPublicKey,
-            VirgilPFSPublicKey recipientPfsOtPublicKey,
-            VirgilPFSInitiatorPrivateInfo pfsInitiatorPrivateInfo)
-        {
-            VirgilPFSResponderPublicInfo pfsInitiatorPublicInfo = null;
-            if (this.recipientCredentials.OTCard != null)
-            {
-                pfsInitiatorPublicInfo = new VirgilPFSResponderPublicInfo(recipientPfsPublicKey,
-                    recipientPfsLtPublicKey,
-                    recipientPfsOtPublicKey);
-            }
-            else
-            {
-                pfsInitiatorPublicInfo = new VirgilPFSResponderPublicInfo(recipientPfsPublicKey,
-                    recipientPfsLtPublicKey);
-            }
-            return (this.additionalData == null)
-                ? this.pfs.StartInitiatorSession(pfsInitiatorPrivateInfo, pfsInitiatorPublicInfo)
-                : this.pfs.StartInitiatorSession(pfsInitiatorPrivateInfo, pfsInitiatorPublicInfo, this.additionalData);
-        }
-
-        private void SaveSessionState(VirgilPFSSession session)
-        {
-            var sessionId = session.GetIdentifier();
-            var sessionState = new InitiatorSessionState(sessionId,
-                this.createdAt,
-                this.expiredAt,
-                this.additionalData,
-                this.myEphKeyName,
-                this.recipientIdentityCard,
-                this.recipientCredentials.LTCard,
-                this.recipientCredentials.OTCard
-            );
-            this.sessionHelper.SaveSessionState(sessionState, this.recipientIdentityCard.Id);
-        }
+        
 
         public override string Encrypt(String message)
         {
@@ -130,13 +97,15 @@
                 var myEphPublicKeyData = this.crypto.ExportPublicKey(myEphPublicKey);
                 var signForEphPublicKey = this.crypto.Sign(myEphPublicKeyData, this.myPrivateKey);
 
-                var msgData = VirgilBuffer.From(message).GetBytes();
-                var encryptedMessage = this.pfs.Encrypt(msgData);
+                var encryptedMessage = JsonSerializer.Deserialize<Message>(
+                    this.CoreSession.Encrypt(message)
+                    );
+
                 var msg = new Message()
                 {
-                    Salt = encryptedMessage.GetSalt(),
-                    CipherText = encryptedMessage.GetCipherText(),
-                    SessionId = encryptedMessage.GetSessionIdentifier()
+                    Salt = encryptedMessage.Salt,
+                    CipherText = encryptedMessage.CipherText,
+                    SessionId = encryptedMessage.SessionId
                 };
                 var initialMsg = new InitialMessage()
                 {
