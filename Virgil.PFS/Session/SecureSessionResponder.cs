@@ -15,7 +15,6 @@ namespace Virgil.PFS
         public SecureSessionResponder(
             ICrypto crypto,
             IPrivateKey myPrivateKey,
-            CardModel myIdentityCard,
             CardModel initiatorIdentityCard,
             byte[] additionalData,
             SecureChatKeyHelper keyHelper,
@@ -25,39 +24,6 @@ namespace Virgil.PFS
             base(crypto, myPrivateKey, recovered, expiredAt, keyHelper, sessionHelper, initiatorIdentityCard.Id, additionalData)
         {
             this.initiatorIdentityCard = initiatorIdentityCard;
-        }
-
-        public SecureSessionResponder(ICrypto crypto,
-            IPrivateKey myPrivateKey,
-            CardModel myIdentityCard,
-            CardModel initiatorIdentityCard,
-            byte[] additionalData,
-            SecureChatKeyHelper keyHelper,
-            SecureSessionHelper sessionHelper,
-            byte[] initiatorEphPublicKeyData,
-            string responderLtcId,
-            string responderOtcId,
-            DateTime expiredAt) :
-            this(crypto, myPrivateKey, myIdentityCard, initiatorIdentityCard, additionalData,
-            keyHelper, sessionHelper, expiredAt, true)
-        {
-            this.InitializeSession(initiatorEphPublicKeyData, responderLtcId, responderOtcId);
-        }
-
-        internal string Decrypt(InitialMessage encryptedMessage)
-        {
-            if (!this.IsInitialized())
-            {
-                this.InitializeSession(encryptedMessage);
-            }
-            var message = new Message()
-            {
-                SessionId = this.CoreSession.GetSessionId(),
-                CipherText = encryptedMessage.CipherText,
-                Salt = encryptedMessage.Salt
-            };
-            return this.Decrypt(message);
-
         }
 
         private void InitializeSession(InitialMessage message)
@@ -123,6 +89,22 @@ namespace Virgil.PFS
             }
         }
 
+        internal string Decrypt(InitialMessage encryptedMessage)
+        {
+            if (!this.IsInitialized())
+            {
+                this.InitializeSession(encryptedMessage);
+            }
+            var message = new Message()
+            {
+                SessionId = this.CoreSession.GetSessionId(),
+                CipherText = encryptedMessage.CipherText,
+                Salt = encryptedMessage.Salt
+            };
+            return this.Decrypt(message);
+
+        }
+
         public override string Decrypt(string encryptedMessage)
         {
             if (MessageHelper.IsInitialMessage(encryptedMessage))
@@ -132,12 +114,9 @@ namespace Virgil.PFS
             }
             else
             {
-                if (!this.IsInitialized())
-                {
-                    throw new SecureSessionResponderException("Session is not initialized!");
-                }
-                var message = MessageHelper.ExtractMessage(encryptedMessage);
-                return base.Decrypt(message);
+                this.Validate();
+                return this.CoreSession.Decrypt(encryptedMessage);
+
             }
         }
 

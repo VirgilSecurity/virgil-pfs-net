@@ -15,17 +15,15 @@ namespace Virgil.PFS
     public class SecureSessionInitiator : SecureSession
     {
 
-        private CardModel myIdentityCard;
+        private string myIdentityCardId;
         private IPrivateKey myEphPrivateKey;
         private CredentialsModel recipientCredentials;
-        private string myEphKeyName;
         private CardModel recipientIdentityCard;
 
         public SecureSessionInitiator(ICrypto crypto,
             IPrivateKey myPrivateKey,
-            CardModel myIdentityCard,
+            string myIdentityCardId,
             IPrivateKey myEphPrivateKey,
-            string myEphKeyName,
             CredentialsModel recipientCredentials,
             CardModel recipientIdentityCard,
             SecureChatKeyHelper keyHelper, 
@@ -36,9 +34,8 @@ namespace Virgil.PFS
             )
             : base(crypto, myPrivateKey, recovered, expiredAt, keyHelper, sessionHelper, recipientIdentityCard.Id, additionalData)
         {
-            this.myIdentityCard = myIdentityCard;
+            this.myIdentityCardId = myIdentityCardId;
             this.myEphPrivateKey = myEphPrivateKey;
-            this.myEphKeyName = myEphKeyName;
             this.recipientCredentials = recipientCredentials;
             this.recipientIdentityCard = recipientIdentityCard;
             if (recovered)
@@ -111,7 +108,7 @@ namespace Virgil.PFS
                 {
                     CipherText = msg.CipherText,
                     EphPublicKey = myEphPublicKeyData,
-                    InitiatorIcId = this.myIdentityCard.Id,
+                    InitiatorIcId = this.myIdentityCardId,
                     EphPublicKeySignature = signForEphPublicKey,
                     ResponderIcId = this.recipientIdentityCard.Id,
                     ResponderLtcId = this.recipientCredentials.LTCard.Id,
@@ -129,12 +126,8 @@ namespace Virgil.PFS
 
         public override string Decrypt(string message)
         {
-            if (!this.IsInitialized())
-            {
-                throw new SecureSessionInitiatorException("Session is not initialized.");
-            }
-            var msg = MessageHelper.ExtractMessage(message);
-            return base.Decrypt(msg);
+            this.Validate();
+            return this.CoreSession.Decrypt(message);
         }
     }
 }

@@ -42,10 +42,8 @@ namespace Virgil.PFS
         {
             return !this.AllKeys().Values.Any(x => (DateTime.Now < ((DateTime) x.ExpiredAt).AddDays(-1)));
         }
-        public string[] RemoveExpiredKeys()
+        public void RemoveExpiredKeys()
         {
-            var cardIds = new List<string>();
-
             var paths = Array.FindAll(this.keyStorage.Names(), s => s.Contains(this.StoragePrefixForCurrentOwner()));
 
             foreach (var path in paths)
@@ -55,11 +53,9 @@ namespace Virgil.PFS
                 
                 if (DateTime.Now >= expiredAt)
                 {
-                    cardIds.Add(key.Name);
                     this.keyStorage.Delete(path);
                 }
             }
-            return cardIds.ToArray();
         }
     }
 }

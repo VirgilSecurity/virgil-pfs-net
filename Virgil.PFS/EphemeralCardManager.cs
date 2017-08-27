@@ -100,13 +100,16 @@ namespace Virgil.PFS
         public async Task<CredentialsModel> GetCredentialsByIdentityCard(CardModel identityCard)
         {
             var credentials = (await this.client.SearchCredentialsByIds(new String[] { identityCard.Id })).FirstOrDefault();
-
+            if (credentials == null)
+            {
+                throw new CredentialsException("Error obtaining recipient credentials.");
+            }
             var validator = new EphemeralCardValidator(this.crypto);
             validator.AddVerifier(identityCard.Id, identityCard.SnapshotModel.PublicKeyData);
 
-            if (credentials.LTCard == null && credentials.OTCard == null)
+            if (credentials.LTCard == null)
             {
-                throw new CredentialsException("Error obtaining recipient cards set. Empty set.");
+                throw new CredentialsException("Error obtaining recipient cards set.");
             }
 
             if (!validator.Validate(credentials.LTCard) ||

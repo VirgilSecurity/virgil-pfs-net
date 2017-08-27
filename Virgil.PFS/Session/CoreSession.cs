@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Virgil.Crypto.Pfs;
 using Virgil.PFS.Client;
+using Virgil.PFS.Exceptions;
 using Virgil.PFS.KeyUtils;
 using Virgil.SDK;
 
@@ -24,9 +25,13 @@ namespace Virgil.PFS.Session
             byte[] additionalData
             ) : this()
         {
-            var session = new VirgilPFSSession(sessionId, encryptionKey, decryptionKey, additionalData);
+            var data = new byte[] { };
+            if (additionalData != null)
+            {
+                data = additionalData;
+            }
+            var session = new VirgilPFSSession(sessionId, encryptionKey, decryptionKey, data);
             this.pfs.SetSession(session);
-
         }
 
         public CoreSession(VirgilPFSPublicKey recipientPfsPublicKey,
@@ -81,13 +86,6 @@ namespace Virgil.PFS.Session
             {
                 this.pfs.StartResponderSession(responderPrivateInfo, initiatorPublicInfo, additionalData);
             }
-
-        }
-
-
-        public string Decrypt(string encryptedMessage)
-        {
-            throw new NotImplementedException();
         }
 
         public string Decrypt(Message msg)
@@ -101,8 +99,16 @@ namespace Virgil.PFS.Session
             return VirgilBuffer.From(msgData).ToString(StringEncoding.Utf8);
         }
 
+        public string Decrypt(string msg)
+        {
+            this.Validate();
+            var message = MessageHelper.ExtractMessage(msg);
+            return this.Decrypt(message);
+        }
+
         public string Encrypt(string message)
         {
+            this.Validate();
             var msgData = VirgilBuffer.From(message).GetBytes();
             var encryptedMessage = this.pfs.Encrypt(msgData);
             var msg = new Message()
@@ -122,7 +128,7 @@ namespace Virgil.PFS.Session
 
         public SessionKey GetKey()
         {
-           return  new SessionKey()
+            return new SessionKey()
             {
                 DecryptionKey = this.pfs.GetSession().GetDecryptionSecretKey(),
                 EncryptionKey = this.pfs.GetSession().GetEncryptionSecretKey()
@@ -131,12 +137,16 @@ namespace Virgil.PFS.Session
 
         public byte[] GetSessionId()
         {
+            this.Validate();
             return this.pfs.GetSession().GetIdentifier();
         }
 
-        public string GetSessionIdBase64()
+        private void Validate()
         {
-            return Convert.ToBase64String(this.GetSessionId());
+            if (!this.IsInitialized())
+            {
+                throw new SecureSessionException("Core Session is not initialized!");
+            }
         }
     }
 }

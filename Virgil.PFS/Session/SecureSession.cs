@@ -12,6 +12,7 @@ using Virgil.PFS.KeyUtils;
 using Virgil.PFS.Session;
 using Virgil.SDK;
 using Virgil.SDK.Client;
+using Virgil.PFS.Exceptions;
 
 namespace Virgil.PFS
 {
@@ -27,7 +28,6 @@ namespace Virgil.PFS
         protected SecureChatKeyHelper keyHelper;
         protected string InterlocutorCardId;
         protected CoreSession CoreSession;
-        //protected VirgilPFS pfs;
 
 
         public SecureSession(ICrypto crypto, 
@@ -69,14 +69,11 @@ namespace Virgil.PFS
             return this.CoreSession.Encrypt(message);
         }
 
-
-
-
         public abstract string Decrypt(string encryptedMessage);
 
         protected void SaveCoreSessionData()
         {
-            this.keyHelper.SessionKeyHolder().SaveKeyByName(this.CoreSession.GetKey(), this.CoreSession.GetSessionIdBase64());
+            this.keyHelper.SessionKeyHolder().SaveKeyByName(this.CoreSession.GetKey(), InterlocutorCardId);
             
             var sessionState = new SessionState(
                 this.CoreSession.GetSessionId(), 
@@ -89,7 +86,23 @@ namespace Virgil.PFS
         public string Decrypt(Message msg)
         {
             return this.CoreSession.Decrypt(msg);
+        }
 
+        public byte[] GetSessionId()
+        {
+            if (this.IsInitialized())
+            {
+                return this.CoreSession.GetSessionId();
+            }
+            return null;
+        }
+
+        protected void Validate()
+        {
+            if (!this.IsInitialized())
+            {
+                throw new SecureSessionException("Secure Session is not initialized!");
+            }
         }
 
     }

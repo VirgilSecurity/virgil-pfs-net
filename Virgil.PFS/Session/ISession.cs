@@ -12,5 +12,7 @@ namespace Virgil.PFS.Session
         string Decrypt(Message msg);
         string Encrypt(string message);
         bool IsInitialized();
+        byte[] GetSessionId();
+
     }
 }
