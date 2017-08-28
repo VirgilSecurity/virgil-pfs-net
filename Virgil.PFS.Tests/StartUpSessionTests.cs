@@ -11,6 +11,7 @@ using Virgil.SDK.Cryptography;
 using Virgil.PFS.Exceptions;
 using Virgil.PFS;
 using Virgil.PFS.Session;
+using Virgil.PFS.Session.Default;
 
 namespace Virgil.PFS.Tests
 {
@@ -28,11 +29,7 @@ namespace Virgil.PFS.Tests
                 crypto,
                 bobCard,
                 bobKeys.PrivateKey,
-                new ServiceInfo()
-                {
-                    AccessToken = IntegrationHelper.AppAccessToken,
-                    Address = "https://pfs-stg.virgilsecurity.com"
-                });
+                IntegrationHelper.GetServiceInfo());
             var secureChatForBob = new SecureChat(secureChatParamsForBob);
             await secureChatForBob.RotateKeysAsync(1);
 
@@ -43,11 +40,7 @@ namespace Virgil.PFS.Tests
                 crypto,
                 aliceCard,
                 aliceKeys.PrivateKey,
-                new ServiceInfo()
-                {
-                    AccessToken = IntegrationHelper.AppAccessToken,
-                    Address = "https://pfs-stg.virgilsecurity.com"
-                });
+                IntegrationHelper.GetServiceInfo());
 
             var secureChatForAlice = new SecureChat(secureChatParamsForAlice);
             var sessionA = await secureChatForAlice.StartNewSessionWithAsync(bobCard);
@@ -72,11 +65,7 @@ namespace Virgil.PFS.Tests
                 crypto,
                 bobCard,
                 bobKeys.PrivateKey,
-                new ServiceInfo()
-                {
-                    AccessToken = IntegrationHelper.AppAccessToken,
-                    Address = "https://pfs-stg.virgilsecurity.com"
-                });
+                IntegrationHelper.GetServiceInfo());
             var secureChatForBob = new SecureChat(secureChatParamsForBob);
             await secureChatForBob.RotateKeysAsync(1);
 
@@ -87,11 +76,7 @@ namespace Virgil.PFS.Tests
                 crypto,
                 aliceCard,
                 aliceKeys.PrivateKey,
-                new ServiceInfo()
-                {
-                    AccessToken = IntegrationHelper.AppAccessToken,
-                    Address = "https://pfs-stg.virgilsecurity.com"
-                });
+                IntegrationHelper.GetServiceInfo());
 
             var secureChatForAlice = new SecureChat(secureChatParamsForAlice);
             var sessionA = await secureChatForAlice.StartNewSessionWithAsync(bobCard);
@@ -116,11 +101,7 @@ namespace Virgil.PFS.Tests
                 crypto,
                 aliceCard,
                 aliceKeys.PrivateKey,
-                new ServiceInfo()
-                {
-                    AccessToken = IntegrationHelper.AppAccessToken,
-                    Address = "https://pfs-stg.virgilsecurity.com"
-                });
+                IntegrationHelper.GetServiceInfo());
 
             var secureChatForAlice = new SecureChat(secureChatParamsForAlice);
             //var keyHelper = new SecureChatKeyHelper(crypto, aliceCard.Id, secureChatParamsForAlice.LtPrivateKeyLifeDays);
@@ -132,7 +113,6 @@ namespace Virgil.PFS.Tests
         }
 
         [Test]
-        [Ignore("zzzz")]
         public async Task StartUpSession_Should_CreateSession_If_ExpiredSessionExists()
         {
             var crypto = new VirgilCrypto();
@@ -147,22 +127,27 @@ namespace Virgil.PFS.Tests
                 crypto,
                 aliceCard,
                 aliceKeys.PrivateKey,
-                new ServiceInfo()
-                {
-                    AccessToken = IntegrationHelper.AppAccessToken,
-                    Address = "https://pfs-stg.virgilsecurity.com"
-                }
+                IntegrationHelper.GetServiceInfo()
                 );
 
             var secureChatParamsForBob = new SecureChatParams(
                 crypto,
                 aliceCard,
                 aliceKeys.PrivateKey,
-                new ServiceInfo()
-                {
-                    AccessToken = IntegrationHelper.AppAccessToken,
-                    Address = "https://pfs-stg.virgilsecurity.com"
-                });
+                IntegrationHelper.GetServiceInfo());
+
+            var expiredSessionState = new SessionState(
+              new byte[] { },
+              DateTime.Now.AddDays(-5),
+              DateTime.Now.AddDays(-1),
+              new byte[] { });
+
+            var sessionStorage = new DefaultUserDataStorage();
+            var sessionHelper = new SecureSessionHelper(aliceCard.Id, sessionStorage);
+
+            Assert.IsFalse(sessionHelper.ExistSessionState(bobCard.Id));
+            sessionHelper.SaveSessionState(expiredSessionState, bobCard.Id);
+            Assert.IsTrue(sessionHelper.ExistSessionState(bobCard.Id));
 
             var secureChatForAlice = new SecureChat(secureChatParamsForAlice);
             var secureChatForBob = new SecureChat(secureChatParamsForBob);
@@ -171,14 +156,17 @@ namespace Virgil.PFS.Tests
             await secureChatForAlice.RotateKeysAsync(1);
 
             var session = await secureChatForAlice.StartNewSessionWithAsync(bobCard);
-
             // Initialize session and save session key, session state
             session.Encrypt("Hi Bob!");
 
-            var session2 = await secureChatForAlice.StartNewSessionWithAsync(bobCard);
+            Assert.IsTrue(sessionHelper.ExistSessionState(bobCard.Id));
+            Assert.IsFalse(
+                Enumerable.SequenceEqual(
+                    sessionHelper.GetSessionState(bobCard.Id).SessionId, 
+                    expiredSessionState.SessionId)
+            );
 
-            Assert.IsFalse(Enumerable.SequenceEqual(session.GetSessionId(), session2.GetSessionId()));
-
+            sessionHelper.DeleteSessionState(bobCard.Id);
             await IntegrationHelper.RevokeCard(aliceCard.Id);
             await IntegrationHelper.RevokeCard(bobCard.Id);
 

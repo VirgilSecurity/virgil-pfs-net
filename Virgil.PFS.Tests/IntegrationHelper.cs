@@ -70,6 +70,15 @@ namespace Virgil.PFS.Tests
             await client.RevokeCardAsync(revokeRequest);
         }
 
+        public static ServiceInfo GetServiceInfo()
+        {
+           return  new ServiceInfo()
+            {
+                AccessToken = IntegrationHelper.AppAccessToken,
+                Address = "https://pfs-stg.virgilsecurity.com"
+            };
+        }
+
        
     }
 }

@@ -39,20 +39,18 @@ namespace Virgil.PFS
 
         public async Task RotateKeysAsync(int desireNumberOfCards = 10)
         {
-            this.Cleanup();
+            await this.Cleanup();
             var numberOfOtCard = await this.cardManager.GetOtCardsCount(this.myIdentityCard.Id);
-            if (desireNumberOfCards > numberOfOtCard.Active)
-            {
-                await cardManager.BootstrapCardsSet(
-                    this.myIdentityCard,
-                    this.myPrivateKey,
-                    (desireNumberOfCards - numberOfOtCard.Active)
-                    );
-
-            }
+            var missingCards = ((desireNumberOfCards - numberOfOtCard.Active) > 0)
+                ? (desireNumberOfCards - numberOfOtCard.Active) : 0;
+            await cardManager.BootstrapCardsSet(
+                this.myIdentityCard,
+                this.myPrivateKey,
+                missingCards
+                );
         }
 
-        private async void Cleanup()
+        private async Task Cleanup()
         {
             var sessionInfos = this.sessionHelper.GetAllSessionStates();
             foreach (var sessionInfo in sessionInfos)
@@ -63,7 +61,7 @@ namespace Virgil.PFS
                 }
             }
             this.keyHelper.LtKeyHolder().RemoveExpiredKeys();
-           
+
             await this.RemoveExhaustedOtKeys();
         }
 
@@ -80,21 +78,23 @@ namespace Virgil.PFS
         {
             //remove exhausted otcards, which don't belong to any session states more than 1 day
             var otKeys = this.keyHelper.OtKeyHolder().AllKeys();
-
-            var exhaustedOtCardIds = await this.cardManager.ValidateOtCards(this.myIdentityCard.Id, otKeys.Keys);
-            var otKeysToBeRemoved = otKeys.Where(x => exhaustedOtCardIds.Contains(x.Key))
-                .ToDictionary(p => p.Key, p => p.Value);
-            foreach (var otKey in otKeysToBeRemoved)
+            if (otKeys.Count > 0)
             {
-                if (otKey.Value.ExpiredAt == null)
+                var exhaustedOtCardIds = await this.cardManager.ValidateOtCards(this.myIdentityCard.Id, otKeys.Keys);
+                var otKeysToBeRemoved = otKeys.Where(x => exhaustedOtCardIds.Contains(x.Key))
+                    .ToDictionary(p => p.Key, p => p.Value);
+                foreach (var otKey in otKeysToBeRemoved)
                 {
-                    this.keyHelper.OtKeyHolder().SetUpExpiredAt(otKey.Key);
-                }
-                else
-                {
-                    if (otKey.Value.ExpiredAt <= DateTime.Now)
+                    if (otKey.Value.ExpiredAt == null)
                     {
-                        this.keyHelper.OtKeyHolder().RemoveKey(otKey.Key);
+                        this.keyHelper.OtKeyHolder().SetUpExpiredAt(otKey.Key);
+                    }
+                    else
+                    {
+                        if (otKey.Value.ExpiredAt <= DateTime.Now)
+                        {
+                            this.keyHelper.OtKeyHolder().RemoveKey(otKey.Key);
+                        }
                     }
                 }
             }
@@ -241,17 +241,17 @@ namespace Virgil.PFS
         {
             try
             {
-               var sessionKey = this.keyHelper.SessionKeyHolder().LoadKeyByName(
-                   recipientCardId);
-               return new CoreSession(sessionState.SessionId,
-                    sessionKey.EncryptionKey, sessionKey.DecryptionKey, sessionState.AdditionalData);
+                var sessionKey = this.keyHelper.SessionKeyHolder().LoadKeyByName(
+                    recipientCardId);
+                return new CoreSession(sessionState.SessionId,
+                     sessionKey.EncryptionKey, sessionKey.DecryptionKey, sessionState.AdditionalData);
             }
             catch (Exception)
             {
                 throw new SecureSessionHolderException("Unknown session state");
             }
         }
-        
+
 
         public void GentleReset()
         {

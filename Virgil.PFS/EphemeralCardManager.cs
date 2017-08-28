@@ -70,8 +70,6 @@ namespace Virgil.PFS
                 oneTimeCardParamsList.Add(oneTimeCardParams);
             }
 
-
-
             if (longTermCardParams != null)
             {
                 var createCardsRequest = factory.CreateEphemeralCardsRequest(
@@ -94,7 +92,6 @@ namespace Virgil.PFS
                     await this.client.CreateOtCardsAsync(identityCard.Id, createCardsRequest);
                 }
             }
-
         }
 
         public async Task<CredentialsModel> GetCredentialsByIdentityCard(CardModel identityCard)

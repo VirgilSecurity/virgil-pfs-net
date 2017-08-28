@@ -56,7 +56,9 @@
             var cardIds = new List<string>();
 
             var sessionStatePaths = this.sessionStateHolder.LoadAllNames();
-            foreach(var sessionStatePath in sessionStatePaths)
+            var ownerStatePaths = Array.FindAll(
+                sessionStatePaths, s => s.Contains(this.GetSessionPathPrefix()));
+            foreach(var sessionStatePath in ownerStatePaths)
             {
                 string cardId = sessionStatePath.Split(
                     new string[] { this.GetSessionPathPrefix() }, 

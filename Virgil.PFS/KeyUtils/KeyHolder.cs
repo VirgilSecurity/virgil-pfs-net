@@ -74,13 +74,17 @@ namespace Virgil.PFS
             var result = new Dictionary<string, KeyInfo>();
             foreach (var keyPath in keyPaths)
             {
+
                 var key = this.keyStorage.Load(keyPath);
-                var keyInfo = new KeyInfo()
+                DateTime? expiredAt = null;
+                if (key.MetaData != null && key.MetaData[this.expiredFieldName] != null)
+                {
+                    expiredAt = GetDateTime(key.MetaData[this.expiredFieldName]);
+                }
+                    var keyInfo = new KeyInfo()
                 {
                     PrivateKey = this.crypto.ImportPrivateKey(key.Value),
-                    ExpiredAt = (key.MetaData[this.expiredFieldName] == null) ?
-                    null :
-                    GetDateTime(key.MetaData[this.expiredFieldName])
+                    ExpiredAt = expiredAt
                 };
                 var cardId = key.Name.Split(new string[] { this.StoragePrefix() }, StringSplitOptions.None).Last();
                 result.Add(cardId, keyInfo);
