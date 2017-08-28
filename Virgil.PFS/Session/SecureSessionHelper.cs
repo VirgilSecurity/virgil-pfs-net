@@ -1,25 +1,35 @@
-﻿namespace Virgil.PFS
+﻿namespace Virgil.PFS.Session
 {
     using System;
     using System.Collections.Generic;
     using Virgil.PFS.Client;
-    using Virgil.PFS.Exceptions;
+    using System.Linq;
+
 
     public class SecureSessionHelper
     {
         private string ownerCardId;
-        private ISessionStateHolder sessionStateHolder;
+        private IUserDataStorage sessionStateHolder;
 
-        public SecureSessionHelper(string cardId)
+        public SecureSessionHelper(string cardId, IUserDataStorage sessionStorage)
         {
             this.ownerCardId = cardId;
 
-            this.sessionStateHolder = new SessionStateHolder(cardId);
+            this.sessionStateHolder = sessionStorage;
+        }
+        private string GetSessionPathPrefix()
+        {
+            return $"{ownerCardId}--";
+        }
+        private string GetSessionPath(string cardId)
+        {
+            return this.GetSessionPathPrefix() + cardId;
         }
 
         public SessionState GetSessionState(string cardId)
         {
-            var sessionStateJson = this.sessionStateHolder.Load(cardId);
+            var stateSessionPath = this.GetSessionPath(cardId);
+            var sessionStateJson = this.sessionStateHolder.Load(stateSessionPath);
             return JsonSerializer.Deserialize<SessionState>(sessionStateJson, true);
         }
 
@@ -43,22 +53,33 @@
 
         public string[] GetAllSessionStateIds()
         {
-            return this.sessionStateHolder.LoadAllNames();
+            var cardIds = new List<string>();
+
+            var sessionStatePaths = this.sessionStateHolder.LoadAllNames();
+            foreach(var sessionStatePath in sessionStatePaths)
+            {
+                string cardId = sessionStatePath.Split(
+                    new string[] { this.GetSessionPathPrefix() }, 
+                    StringSplitOptions.None).Last();
+                cardIds.Add(cardId);
+            }
+
+            return cardIds.ToArray();
         }
 
         public void DeleteSessionState(string cardId)
         {
-            this.sessionStateHolder.Delete(cardId);
+            this.sessionStateHolder.Delete(this.GetSessionPath(cardId));
         }
 
         public bool ExistSessionState(string cardId)
         {
-            return this.sessionStateHolder.Exists(cardId);
+            return this.sessionStateHolder.Exists(this.GetSessionPath(cardId));
         }
 
         public void SaveSessionState(SessionState sessionState, string cardId)
         {
-            this.sessionStateHolder.Save(JsonSerializer.Serialize(sessionState), cardId);
+            this.sessionStateHolder.Save(JsonSerializer.Serialize(sessionState), this.GetSessionPath(cardId));
         }
 
         public struct SessionInfo

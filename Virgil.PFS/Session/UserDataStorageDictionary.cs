@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Virgil.PFS.Session
 {
-    class UserDataStorage : IUserDataStorage
+    class UserDataStorageDictionary : IUserDataStorageDictionary
     {
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
         {

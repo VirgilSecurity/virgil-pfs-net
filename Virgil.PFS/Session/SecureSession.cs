@@ -14,7 +14,7 @@ using Virgil.SDK;
 using Virgil.SDK.Client;
 using Virgil.PFS.Exceptions;
 
-namespace Virgil.PFS
+namespace Virgil.PFS.Session
 {
     public abstract class SecureSession : ISession
     {

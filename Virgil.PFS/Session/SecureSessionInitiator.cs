@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Virgil.PFS.Session;
 
-namespace Virgil.PFS
+namespace Virgil.PFS.Session
 {
     using System;
     using Virgil.Crypto.Pfs;

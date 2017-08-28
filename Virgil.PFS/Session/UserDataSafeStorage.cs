@@ -4,6 +4,7 @@ using Virgil.SDK.Storage;
 
 namespace Virgil.PFS
 {
+    using Session;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -11,14 +12,14 @@ namespace Virgil.PFS
     using System.Text;
     using Virgil.PFS;
 
-    internal class SessionStateHolder : ISessionStateHolder
+    public class UserDataSafeStorage : IUserDataStorage
     {
         protected IKeyStorage keyStorage;
         private const string sessionFolder = "Sessions";
         protected string ownerId;
 
 
-        public SessionStateHolder(string ownerCardId)
+        public UserDataSafeStorage(string ownerCardId)
         {
              this.keyStorage = new DefaultKeyStorage($"{sessionFolder}\\{ownerCardId}", false);
             this.ownerId = ownerCardId;

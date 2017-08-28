@@ -33,7 +33,7 @@ namespace Virgil.PFS
             this.myIdentityCard = parameters.IdentityCard;
             this.keyHelper = new SecureChatKeyHelper(crypto, this.myIdentityCard.Id, parameters.LtPrivateKeyLifeDays);
             this.cardManager = new EphemeralCardManager(this.crypto, this.keyHelper, parameters.ServiceInfo);
-            this.sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id);
+            this.sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id, parameters.SessionStorage);
             this.sessionExpireTime = DateTime.Now.AddDays(this.parameters.SessionLifeDays);
         }
 
@@ -59,7 +59,7 @@ namespace Virgil.PFS
             {
                 if (sessionInfo.SessionState.IsSessionExpired())
                 {
-                    this.CleanSessionDataByCardId(sessionInfo.CardId, sessionInfo.SessionState);
+                    this.CleanSessionDataByCardId(sessionInfo.CardId);
                 }
             }
             this.keyHelper.LtKeyHolder().RemoveExpiredKeys();
@@ -132,7 +132,7 @@ namespace Virgil.PFS
                 {
                     if (sessionState.IsSessionExpired())
                     {
-                        this.CleanSessionDataByCardId(recipientCard.Id, sessionState);
+                        this.CleanSessionDataByCardId(recipientCard.Id);
                     }
                     else
                     {
@@ -151,7 +151,7 @@ namespace Virgil.PFS
                 var sessionState = this.sessionHelper.GetSessionState(recipientCardId);
                 if (sessionState.IsSessionExpired())
                 {
-                    this.CleanSessionDataByCardId(recipientCardId, sessionState);
+                    this.CleanSessionDataByCardId(recipientCardId);
                     return null;
                 }
                 return this.RecoverSession(recipientCardId, sessionState);
@@ -169,10 +169,7 @@ namespace Virgil.PFS
             {
                 if (this.sessionHelper.ExistSessionState(recipientCardId))
                 {
-                    CleanSessionDataByCardId(
-                        recipientCardId, 
-                        this.sessionHelper.GetSessionState(recipientCardId)
-                        );
+                    CleanSessionDataByCardId(recipientCardId);
                 }
             }
             catch (Exception)
@@ -181,7 +178,7 @@ namespace Virgil.PFS
             }
         }
 
-        private void CleanSessionDataByCardId(string recipientCardId, SessionState sessionState)
+        private void CleanSessionDataByCardId(string recipientCardId)
         {
             this.RemoveSessionKey(recipientCardId);
             this.sessionHelper.DeleteSessionState(recipientCardId);
@@ -249,7 +246,7 @@ namespace Virgil.PFS
                return new CoreSession(sessionState.SessionId,
                     sessionKey.EncryptionKey, sessionKey.DecryptionKey, sessionState.AdditionalData);
             }
-            catch (Exception x)
+            catch (Exception)
             {
                 throw new SecureSessionHolderException("Unknown session state");
             }

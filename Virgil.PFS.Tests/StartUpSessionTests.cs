@@ -9,6 +9,8 @@ using Virgil.SDK.Client;
 using Virgil.SDK.Common;
 using Virgil.SDK.Cryptography;
 using Virgil.PFS.Exceptions;
+using Virgil.PFS;
+using Virgil.PFS.Session;
 
 namespace Virgil.PFS.Tests
 {
@@ -121,7 +123,7 @@ namespace Virgil.PFS.Tests
                 });
 
             var secureChatForAlice = new SecureChat(secureChatParamsForAlice);
-            var keyHelper = new SecureChatKeyHelper(crypto, aliceCard.Id, secureChatParamsForAlice.LtPrivateKeyLifeDays);
+            //var keyHelper = new SecureChatKeyHelper(crypto, aliceCard.Id, secureChatParamsForAlice.LtPrivateKeyLifeDays);
 
             Assert.ThrowsAsync<CredentialsException>(async () => await secureChatForAlice.StartNewSessionWithAsync(bobCard));
 
@@ -149,7 +151,8 @@ namespace Virgil.PFS.Tests
                 {
                     AccessToken = IntegrationHelper.AppAccessToken,
                     Address = "https://pfs-stg.virgilsecurity.com"
-                }, -1);
+                }
+                );
 
             var secureChatParamsForBob = new SecureChatParams(
                 crypto,
