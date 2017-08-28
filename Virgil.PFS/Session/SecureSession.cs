@@ -79,7 +79,7 @@ namespace Virgil.PFS.Session
                 this.CoreSession.GetSessionId(), 
                 this.createdAt,
                 this.expiredAt, 
-                this.additionalData);
+                this.CoreSession.GetAdditionalData());
             this.sessionHelper.SaveSessionState(sessionState, InterlocutorCardId);
         }
 

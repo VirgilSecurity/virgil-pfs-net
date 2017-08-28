@@ -34,6 +34,7 @@ namespace Virgil.PFS.Session
             this.pfs.SetSession(session);
         }
 
+        //for initiator
         public CoreSession(VirgilPFSPublicKey recipientPfsPublicKey,
             VirgilPFSPublicKey recipientPfsLtPublicKey,
             VirgilPFSPublicKey recipientPfsOtPublicKey,
@@ -63,6 +64,7 @@ namespace Virgil.PFS.Session
             }
         }
 
+        //for responder
         public CoreSession(
             VirgilPFSPrivateKey pfsOtPrivateKey,
             VirgilPFSPublicKey initiatorIdentityPublicKey,
@@ -139,6 +141,12 @@ namespace Virgil.PFS.Session
         {
             this.Validate();
             return this.pfs.GetSession().GetIdentifier();
+        }
+
+        public byte[] GetAdditionalData()
+        {
+            this.Validate();
+            return this.pfs.GetSession().GetAdditionalData();
         }
 
         private void Validate()
