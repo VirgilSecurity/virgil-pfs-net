@@ -33,6 +33,11 @@ namespace Virgil.PFS.Session
         {
             return (DateTime.Now > this.ExpiredAt);
         }
+        // session should live one extra day after expiration
+        public bool IsShouldBeDeleted()
+        {
+            return (DateTime.Now > this.ExpiredAt.AddDays(1));
+        }
 
         public string GetSessionIdBase64()
         {

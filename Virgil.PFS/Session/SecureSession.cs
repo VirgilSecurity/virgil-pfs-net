@@ -16,13 +16,12 @@ using Virgil.PFS.Exceptions;
 
 namespace Virgil.PFS.Session
 {
-    public abstract class SecureSession : ISession
+    /*public abstract class SecureSession : ISession
     {
         protected ICrypto crypto;
         protected IPrivateKey myPrivateKey;
         protected DateTime createdAt;
         protected DateTime expiredAt;
-        protected bool isRecovered;
         protected byte[] additionalData;
         protected SecureSessionHelper sessionHelper;
         protected SecureChatKeyHelper keyHelper;
@@ -32,10 +31,7 @@ namespace Virgil.PFS.Session
 
         public SecureSession(ICrypto crypto, 
             IPrivateKey myPrivateKey, 
-            bool recovered, 
             DateTime expiredAt,
-            SecureChatKeyHelper keyHelper,
-            SecureSessionHelper sessionHelper,
             string interlocutorCardId,
             byte[] additionalData)
         {
@@ -43,18 +39,20 @@ namespace Virgil.PFS.Session
             this.myPrivateKey = myPrivateKey;
             this.createdAt = DateTime.Now;
             this.expiredAt = expiredAt;
-            this.isRecovered = recovered;
-            this.sessionHelper = sessionHelper;
-            this.keyHelper = keyHelper;
             this.InterlocutorCardId = interlocutorCardId;
             this.additionalData = additionalData;
         }
 
-
-        public bool IsRecovered()
+        public DateTime CreatedAt()
         {
-            return this.isRecovered;
+            return this.createdAt;
         }
+
+        public DateTime ExpiredAt()
+        {
+            return this.expiredAt;
+        }
+
         public bool IsInitialized()
         {
             return (this.CoreSession != null && this.CoreSession.IsInitialized());
@@ -71,30 +69,33 @@ namespace Virgil.PFS.Session
 
         public abstract string Decrypt(string encryptedMessage);
 
-        protected void SaveCoreSessionData()
-        {
-            this.keyHelper.SessionKeyHolder().SaveKeyByName(this.CoreSession.GetKey(), InterlocutorCardId);
-            
-            var sessionState = new SessionState(
-                this.CoreSession.GetSessionId(), 
-                this.createdAt,
-                this.expiredAt, 
-                this.CoreSession.GetAdditionalData());
-            this.sessionHelper.SaveSessionState(sessionState, InterlocutorCardId);
-        }
-
         public string Decrypt(Message msg)
         {
             return this.CoreSession.Decrypt(msg);
         }
 
-        public byte[] GetSessionId()
+        public byte[] GetId()
         {
             if (this.IsInitialized())
             {
-                return this.CoreSession.GetSessionId();
+                return this.CoreSession.GetId();
             }
             return null;
+        }
+
+        public SessionKey GetKey()
+        {
+            if (this.IsInitialized())
+            {
+                return this.CoreSession.GetKey();
+            }
+            return null;
+
+        }
+
+        public byte[] GetAdditionalData()
+        {
+            return this.CoreSession.GetAdditionalData();
         }
 
         protected void Validate()
@@ -105,5 +106,5 @@ namespace Virgil.PFS.Session
             }
         }
 
-    }
+    }*/
 }

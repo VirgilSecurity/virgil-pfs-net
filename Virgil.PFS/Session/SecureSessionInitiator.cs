@@ -11,7 +11,7 @@ namespace Virgil.PFS.Session
     using Virgil.SDK;
     using Virgil.SDK.Client;
     using Virgil.SDK.Cryptography;
-
+    /*
     public class SecureSessionInitiator : SecureSession
     {
 
@@ -26,23 +26,18 @@ namespace Virgil.PFS.Session
             IPrivateKey myEphPrivateKey,
             CredentialsModel recipientCredentials,
             CardModel recipientIdentityCard,
-            SecureChatKeyHelper keyHelper, 
-            SecureSessionHelper sessionHelper,
             byte[] additionalData,
-            DateTime expiredAt,
-            bool recovered = false
+            DateTime expiredAt
             )
-            : base(crypto, myPrivateKey, recovered, expiredAt, keyHelper, sessionHelper, recipientIdentityCard.Id, additionalData)
+            : base(crypto, myPrivateKey, expiredAt, recipientIdentityCard.Id, additionalData)
         {
             this.myIdentityCardId = myIdentityCardId;
             this.myEphPrivateKey = myEphPrivateKey;
             this.recipientCredentials = recipientCredentials;
             this.recipientIdentityCard = recipientIdentityCard;
-            if (recovered)
-            {
+
             this.InitializeSession();
 
-            }
         }
         private void InitializeSession()
         {
@@ -70,11 +65,6 @@ namespace Virgil.PFS.Session
                 pfsInitiatorPrivateInfo,
                 this.additionalData
                 );
-
-            if (!this.isRecovered)
-            {
-               this.SaveCoreSessionData();
-            }
         }
         
 
@@ -128,6 +118,6 @@ namespace Virgil.PFS.Session
         {
             this.Validate();
             return this.CoreSession.Decrypt(message);
-        }
-    }
+        } 
+    }*/
 }

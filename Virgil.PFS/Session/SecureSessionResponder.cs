@@ -7,7 +7,7 @@ namespace Virgil.PFS.Session
     using Virgil.PFS.Exceptions;
     using Virgil.SDK.Client;
     using Virgil.SDK.Cryptography;
-
+    /*
     public class SecureSessionResponder : SecureSession
     {
         private CardModel initiatorIdentityCard;
@@ -97,7 +97,7 @@ namespace Virgil.PFS.Session
             }
             var message = new Message()
             {
-                SessionId = this.CoreSession.GetSessionId(),
+                SessionId = this.CoreSession.GetId(),
                 CipherText = encryptedMessage.CipherText,
                 Salt = encryptedMessage.Salt
             };
@@ -120,6 +120,6 @@ namespace Virgil.PFS.Session
             }
         }
 
-
-    }
+    
+    }*/
 }

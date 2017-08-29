@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virgil.PFS.KeyUtils;
 
 namespace Virgil.PFS.Session
 {
@@ -12,7 +13,8 @@ namespace Virgil.PFS.Session
         string Decrypt(Message msg);
         string Encrypt(string message);
         bool IsInitialized();
-        byte[] GetSessionId();
-
+        byte[] GetId();
+        SessionKey GetKey();
+        byte[] GetAdditionalData();
     }
 }

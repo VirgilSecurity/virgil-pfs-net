@@ -11,19 +11,36 @@ using Virgil.SDK;
 
 namespace Virgil.PFS.Session
 {
-    public class CoreSession : ISession
+    public class CoreSession
     {
         protected VirgilPFS pfs;
+        private InitialMessageGenerator initialMessageGenerator;
+        private DateTime expiredAt;
+        private DateTime createdAt;
 
-        private CoreSession()
+        public DateTime ExpiredAt()
+        {
+            return expiredAt;
+        }
+
+        public DateTime CreatedAt()
+        {
+            return createdAt;
+        }
+        public CoreSession(DateTime expiredAt, InitialMessageGenerator initialMessageGenerator)
         {
             this.pfs = new VirgilPFS();
+            this.expiredAt = expiredAt;
+            this.createdAt = DateTime.Now;
+            this.initialMessageGenerator = initialMessageGenerator;
         }
         public CoreSession(byte[] sessionId,
             byte[] encryptionKey,
             byte[] decryptionKey,
-            byte[] additionalData
-            ) : this()
+            byte[] additionalData,
+            DateTime createdAt,
+            DateTime expiredAt
+            ) : this(expiredAt, null)
         {
             var data = new byte[] { };
             if (additionalData != null)
@@ -32,6 +49,14 @@ namespace Virgil.PFS.Session
             }
             var session = new VirgilPFSSession(sessionId, encryptionKey, decryptionKey, data);
             this.pfs.SetSession(session);
+            this.createdAt = createdAt;
+        }
+
+        public CoreSession(VirgilPFSSession session, DateTime expiredAt, InitialMessageGenerator initialMessageGenerator)
+        {
+            this.pfs.SetSession(session);
+            this.initialMessageGenerator = initialMessageGenerator;
+            this.expiredAt = expiredAt;
         }
 
         //for initiator
@@ -39,8 +64,10 @@ namespace Virgil.PFS.Session
             VirgilPFSPublicKey recipientPfsLtPublicKey,
             VirgilPFSPublicKey recipientPfsOtPublicKey,
             VirgilPFSInitiatorPrivateInfo pfsInitiatorPrivateInfo,
-            byte[] additionalData
-        ) : this()
+            byte[] additionalData,
+            InitialMessageGenerator initialMessageGenerator,
+            DateTime expiredAt
+        ) : this(expiredAt, initialMessageGenerator)
         {
             VirgilPFSResponderPublicInfo pfsInitiatorPublicInfo = null;
             if (recipientPfsOtPublicKey != null)
@@ -71,8 +98,9 @@ namespace Virgil.PFS.Session
             VirgilPFSPublicKey initiatorEphPublicKey,
             VirgilPFSPrivateKey pfsPrivateKey,
             VirgilPFSPrivateKey pfsLtPrivateKey,
-            byte[] additionalData
-            ) : this()
+            byte[] additionalData,
+            DateTime expiredAt
+            ) : this(expiredAt, null)
         {
             var initiatorPublicInfo = new VirgilPFSInitiatorPublicInfo(initiatorIdentityPublicKey, initiatorEphPublicKey);
             VirgilPFSResponderPrivateInfo responderPrivateInfo = null;
@@ -90,7 +118,7 @@ namespace Virgil.PFS.Session
             }
         }
 
-        public string Decrypt(Message msg)
+        private string Decrypt(Message msg)
         {
             var pfsEncryptedMessage = new VirgilPFSEncryptedMessage(
                 msg.SessionId,
@@ -101,16 +129,60 @@ namespace Virgil.PFS.Session
             return VirgilBuffer.From(msgData).ToString(StringEncoding.Utf8);
         }
 
-        public string Decrypt(string msg)
+
+        public string Decrypt(string encryptedMessage)
         {
             this.Validate();
-            var message = MessageHelper.ExtractMessage(msg);
+
+            if (MessageHelper.IsInitialMessage(encryptedMessage))
+            {
+                var initialMessage = MessageHelper.ExtractInitialMessage(encryptedMessage);
+                return this.Decrypt(initialMessage);
+            }
+            else
+            {
+                var message = MessageHelper.ExtractMessage(encryptedMessage);
+                return this.Decrypt(message);
+            }
+        }
+
+        private string Decrypt(InitialMessage encryptedMessage)
+        {
+            var message = new Message()
+            {
+                SessionId = this.GetId(),
+                CipherText = encryptedMessage.CipherText,
+                Salt = encryptedMessage.Salt
+            };
             return this.Decrypt(message);
+
         }
 
         public string Encrypt(string message)
         {
             this.Validate();
+
+            if (this.initialMessageGenerator != null)
+            {
+                var initialMessageEncrypted = EncryptInitialMessage(message);
+                return JsonSerializer.Serialize(initialMessageEncrypted);
+            }
+            else
+            {
+                return JsonSerializer.Serialize(EncryptMessage(message));
+            }
+        }
+
+        private InitialMessage EncryptInitialMessage(string message)
+        {
+            var msg = EncryptMessage(message);
+            var initialMessage = this.initialMessageGenerator.Generate(msg);
+            this.initialMessageGenerator = null;
+            return initialMessage;
+        }
+
+        private Message EncryptMessage(string message)
+        {
             var msgData = VirgilBuffer.From(message).GetBytes();
             var encryptedMessage = this.pfs.Encrypt(msgData);
             var msg = new Message()
@@ -119,9 +191,9 @@ namespace Virgil.PFS.Session
                 CipherText = encryptedMessage.GetCipherText(),
                 SessionId = encryptedMessage.GetSessionIdentifier()
             };
-
-            return JsonSerializer.Serialize(msg);
+            return msg;
         }
+
 
         public bool IsInitialized()
         {
@@ -130,6 +202,7 @@ namespace Virgil.PFS.Session
 
         public SessionKey GetKey()
         {
+            this.Validate();
             return new SessionKey()
             {
                 DecryptionKey = this.pfs.GetSession().GetDecryptionSecretKey(),
@@ -137,7 +210,7 @@ namespace Virgil.PFS.Session
             };
         }
 
-        public byte[] GetSessionId()
+        public byte[] GetId()
         {
             this.Validate();
             return this.pfs.GetSession().GetIdentifier();
@@ -153,7 +226,7 @@ namespace Virgil.PFS.Session
         {
             if (!this.IsInitialized())
             {
-                throw new SecureSessionException("Core Session is not initialized!");
+                throw new SecureSessionException("Session is not initialized!");
             }
         }
     }

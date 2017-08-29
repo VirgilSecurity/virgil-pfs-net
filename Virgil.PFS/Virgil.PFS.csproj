@@ -58,9 +58,12 @@
     <Compile Include="Exceptions\SecureSessionResponderException.cs" />
     <Compile Include="Exceptions\SecureSessionHolderException.cs" />
     <Compile Include="KeyUtils\SessionKey.cs" />
+    <Compile Include="Message\InitialMessageGenerator.cs" />
     <Compile Include="Session\ISession.cs" />
     <Compile Include="Session\CoreSession.cs" />
     <Compile Include="Session\IUserDataStorageDictionary.cs" />
+    <Compile Include="Session\SessionInitializer.cs" />
+    <Compile Include="Session\SessionManager.cs" />
     <Compile Include="Session\UserDataSafeStorage.cs" />
     <Compile Include="Session\UserDataStorageDictionary.cs" />
     <Compile Include="Utils\JsonSerializer.cs" />

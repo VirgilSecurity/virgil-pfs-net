@@ -21,20 +21,20 @@ namespace Virgil.PFS
         private readonly IPrivateKey myPrivateKey;
         private readonly CardModel myIdentityCard;
         private readonly EphemeralCardManager cardManager;
-        private readonly SecureSessionHelper sessionHelper;
         private readonly SecureChatKeyHelper keyHelper;
         private readonly DateTime sessionExpireTime;
+        private readonly SessionManager sessionManager;
 
         public SecureChat(SecureChatParams parameters)
         {
-            this.parameters = parameters;
             this.crypto = parameters.Crypto;
             this.myPrivateKey = parameters.IdentityPrivateKey;
             this.myIdentityCard = parameters.IdentityCard;
             this.keyHelper = new SecureChatKeyHelper(crypto, this.myIdentityCard.Id, parameters.LtPrivateKeyLifeDays);
             this.cardManager = new EphemeralCardManager(this.crypto, this.keyHelper, parameters.ServiceInfo);
-            this.sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id, parameters.SessionStorage);
-            this.sessionExpireTime = DateTime.Now.AddDays(this.parameters.SessionLifeDays);
+            var sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id, parameters.SessionStorage);
+            this.sessionManager = new SessionManager(myIdentityCard, myPrivateKey, 
+                crypto, sessionHelper, keyHelper, parameters.SessionLifeDays);
         }
 
         public async Task RotateKeysAsync(int desireNumberOfCards = 10)
@@ -52,27 +52,13 @@ namespace Virgil.PFS
 
         private async Task Cleanup()
         {
-            var sessionInfos = this.sessionHelper.GetAllSessionStates();
-            foreach (var sessionInfo in sessionInfos)
-            {
-                if (sessionInfo.SessionState.IsSessionExpired())
-                {
-                    this.CleanSessionDataByCardId(sessionInfo.CardId);
-                }
-            }
+            this.sessionManager.RemoveExpiredSessions();
             this.keyHelper.LtKeyHolder().RemoveExpiredKeys();
 
             await this.RemoveExhaustedOtKeys();
         }
 
-        private void RemoveSessionKey(string cardId)
-        {
-            if (this.keyHelper.SessionKeyHolder()
-                .IsKeyExist(cardId))
-            {
-                this.keyHelper.SessionKeyHolder().RemoveKey(cardId);
-            }
-        }
+
 
         private async Task RemoveExhaustedOtKeys()
         {
@@ -101,91 +87,26 @@ namespace Virgil.PFS
         }
 
 
-        public async Task<ISession> StartNewSessionWithAsync(CardModel recipientCard, byte[] additionalData = null)
+        public async Task<CoreSession> StartNewSessionWithAsync(CardModel recipientCard, byte[] additionalData = null)
         {
-            this.CheckExistingSession(recipientCard);
-
+            this.sessionManager.CheckExistingSession(recipientCard.Id);
             var credentials = await this.cardManager.GetCredentialsByIdentityCard(recipientCard);
-            var ephemeralKeyPair = crypto.GenerateKeys();
-
-            var secureSession = new SecureSessionInitiator(this.crypto,
-                this.myPrivateKey,
-                this.myIdentityCard.Id,
-                ephemeralKeyPair.PrivateKey,
-                credentials,
-                recipientCard,
-                this.keyHelper,
-                this.sessionHelper,
-                additionalData,
-                this.sessionExpireTime
-                );
-            return secureSession;
+            
+            return this.sessionManager.InitializeInitiatorSession(recipientCard, credentials, additionalData);
         }
 
 
-        private void CheckExistingSession(CardModel recipientCard)
+        public CoreSession ActiveSession(string recipientCardId)
         {
-            if (this.sessionHelper.ExistSessionState(recipientCard.Id))
-            {
-                var sessionState = this.sessionHelper.GetSessionState(recipientCard.Id);
-                if (sessionState != null)
-                {
-                    if (sessionState.IsSessionExpired())
-                    {
-                        this.CleanSessionDataByCardId(recipientCard.Id);
-                    }
-                    else
-                    {
-                        throw new SecureSessionException(
-                            "Exist session for given recipient. Try to loadUpSession");
-                    }
-                }
-            }
-        }
-
-
-        public ISession ActiveSession(string recipientCardId)
-        {
-            try
-            {
-                var sessionState = this.sessionHelper.GetSessionState(recipientCardId);
-                if (sessionState.IsSessionExpired())
-                {
-                    this.CleanSessionDataByCardId(recipientCardId);
-                    return null;
-                }
-                return this.RecoverSession(recipientCardId, sessionState);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-
+            return this.sessionManager.GetActiveSession(recipientCardId);
         }
 
         public void RemoveSession(string recipientCardId)
         {
-            try
-            {
-                if (this.sessionHelper.ExistSessionState(recipientCardId))
-                {
-                    CleanSessionDataByCardId(recipientCardId);
-                }
-            }
-            catch (Exception)
-            {
-                throw new SecureSessionHolderException("Remove session exception.");
-            }
+            this.sessionManager.RemoveSession(recipientCardId);
         }
 
-        private void CleanSessionDataByCardId(string recipientCardId)
-        {
-            this.RemoveSessionKey(recipientCardId);
-            this.sessionHelper.DeleteSessionState(recipientCardId);
-        }
-
-
-        public async Task<ISession> LoadUpSession(CardModel recipientCard, string msg, byte[] additionalData = null)
+        public async Task<CoreSession> LoadUpSession(CardModel recipientCard, string msg, byte[] additionalData = null)
         {
             if (MessageHelper.IsInitialMessage(msg))
             {
@@ -201,17 +122,7 @@ namespace Virgil.PFS
                     return null;
                 }
 
-                var sessionResponder = new SecureSessionResponder(
-                    this.crypto,
-                    this.myPrivateKey,
-                    recipientCard,
-                    additionalData,
-                    this.keyHelper,
-                    this.sessionHelper,
-                    this.sessionExpireTime);
-                sessionResponder.Decrypt(initialMessage);
-
-                return sessionResponder;
+                return this.sessionManager.InitializeResponderSession(recipientCard, initialMessage, additionalData);
             }
             else
             {
@@ -219,48 +130,17 @@ namespace Virgil.PFS
             }
         }
 
-        private ISession TryToRecoverSessionByMessage(string recipientCardId, string msg)
+        private CoreSession TryToRecoverSessionByMessage(string recipientCardId, string msg)
         {
             var message = MessageHelper.ExtractMessage(msg);
-            var sessionId = message.SessionId;
-            var sessionState = this.sessionHelper.GetSessionState(recipientCardId);
-            if (sessionState == null)
-            {
-                return null;
-            }
-            if (!Enumerable.SequenceEqual(sessionId, sessionState.SessionId))
-            {
-                throw new Exception("Session isn't found.");
-            }
-
-            return this.RecoverSession(recipientCardId, sessionState);
-
+            return this.sessionManager.LoadUpSession(message.SessionId, recipientCardId);
         }
-
-        private ISession RecoverSession(string recipientCardId, SessionState sessionState)
-        {
-            try
-            {
-                var sessionKey = this.keyHelper.SessionKeyHolder().LoadKeyByName(
-                    recipientCardId);
-                return new CoreSession(sessionState.SessionId,
-                     sessionKey.EncryptionKey, sessionKey.DecryptionKey, sessionState.AdditionalData);
-            }
-            catch (Exception)
-            {
-                throw new SecureSessionHolderException("Unknown session state");
-            }
-        }
-
 
         public void GentleReset()
         {
-            foreach (var initiator in this.sessionHelper.GetAllSessionStates())
-            {
-                this.RemoveSession(initiator.CardId);
-            }
+            this.sessionManager.RemoveAllSessions();
             this.keyHelper.OtKeyHolder().RemoveAllKeys();
             this.keyHelper.LtKeyHolder().RemoveAllKeys();
-        }
+        } 
     }
 }
