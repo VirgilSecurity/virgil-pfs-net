@@ -9,7 +9,7 @@ using Virgil.SDK.Cryptography;
 
 namespace Virgil.PFS
 {
-    public class EphemeralCardValidator : ICardValidator
+    internal class EphemeralCardValidator : ICardValidator
     {
         private readonly Dictionary<string, IPublicKey> verifiers;
         private readonly ICrypto crypto;

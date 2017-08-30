@@ -17,15 +17,15 @@ namespace Virgil.PFS
         private readonly EphemeralCardsClient client;
         private readonly ICrypto crypto;
         private readonly EphemeralRequestFactory factory;
-        private SecureChatKeyHelper keyHelper;
+        private KeyStorageManger keyStorageManger;
 
 
-        public EphemeralCardManager(ICrypto crypto, SecureChatKeyHelper keyHelper, ServiceInfo serviceInfo)
+        public EphemeralCardManager(ICrypto crypto, KeyStorageManger keyStorageManger, ServiceInfo serviceInfo)
         {
             this.crypto = crypto;
             this.factory = new EphemeralRequestFactory(crypto);
             this.client = new EphemeralCardsClient(serviceInfo.AccessToken, serviceInfo.Address);
-            this.keyHelper = keyHelper;
+            this.keyStorageManger = keyStorageManger;
 
         }
 
@@ -37,11 +37,11 @@ namespace Virgil.PFS
         public async Task BootstrapCardsSet(CardModel identityCard, IPrivateKey identityKey, int numberOfCards)
         {
             EphemeralCardParams longTermCardParams = null;
-            if (this.keyHelper.LtKeyHolder().IsWaitingForNewKey())
+            if (this.keyStorageManger.LtKeyStorage().IsWaitingForNewKey())
             {
                 var longTermKeys = crypto.GenerateKeys();
                 var longTermCardId = this.GetCardId(identityCard.SnapshotModel.Identity, longTermKeys.PublicKey);
-                this.keyHelper.LtKeyHolder().SaveKeyByName(longTermKeys.PrivateKey, longTermCardId);
+                this.keyStorageManger.LtKeyStorage().SaveKeyByName(longTermKeys.PrivateKey, longTermCardId);
 
                 longTermCardParams = new EphemeralCardParams()
                 {
@@ -60,7 +60,7 @@ namespace Virgil.PFS
                 var oneTimeKeyPair = crypto.GenerateKeys();
                 var oneTimeCardId = this.GetCardId(identityCard.SnapshotModel.Identity, oneTimeKeyPair.PublicKey);
 
-                this.keyHelper.OtKeyHolder().SaveKeyByName(oneTimeKeyPair.PrivateKey, oneTimeCardId);
+                this.keyStorageManger.OtKeyStorage().SaveKeyByName(oneTimeKeyPair.PrivateKey, oneTimeCardId);
 
                 var oneTimeCardParams = new EphemeralCardParams()
                 {

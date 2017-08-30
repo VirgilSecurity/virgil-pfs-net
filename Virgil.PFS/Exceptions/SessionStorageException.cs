@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virgil.SDK.Exceptions;
 
 namespace Virgil.PFS.Exceptions
 {
-    public class SecureSessionInitiatorException : SecureSessionException
+    public class SessionStorageException : VirgilException
     {
-        public SecureSessionInitiatorException(string message) : base(message)
+        public SessionStorageException(string message) : base(message)
         {
         }
     }

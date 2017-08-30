@@ -14,7 +14,7 @@ namespace Virgil.PFS
         [JsonProperty("salt")]
         public byte[] Salt { get; set; }
 
-        [JsonProperty("cipher_text")]
+        [JsonProperty("ciphertext")]
         public byte[] CipherText { get; set; }
     }
 }

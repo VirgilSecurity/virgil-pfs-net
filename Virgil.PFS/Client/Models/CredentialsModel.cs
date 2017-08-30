@@ -8,7 +8,7 @@ using Virgil.SDK.Client;
 
 namespace Virgil.PFS
 {
-    public class CredentialsModel
+    internal class CredentialsModel
     {
         [JsonProperty("long_time_card")]
         public CardModel LTCard { get; set; }

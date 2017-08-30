@@ -16,25 +16,23 @@ namespace Virgil.PFS
 {
     public class SecureChat
     {
-        private readonly SecureChatParams parameters;
         private readonly ICrypto crypto;
         private readonly IPrivateKey myPrivateKey;
         private readonly CardModel myIdentityCard;
         private readonly EphemeralCardManager cardManager;
-        private readonly SecureChatKeyHelper keyHelper;
-        private readonly DateTime sessionExpireTime;
+        private readonly KeyStorageManger keyStorageManger;
         private readonly SessionManager sessionManager;
 
-        public SecureChat(SecureChatParams parameters)
+        public SecureChat(SecureChatPreferences parameters)
         {
             this.crypto = parameters.Crypto;
             this.myPrivateKey = parameters.IdentityPrivateKey;
             this.myIdentityCard = parameters.IdentityCard;
-            this.keyHelper = new SecureChatKeyHelper(crypto, this.myIdentityCard.Id, parameters.LtPrivateKeyLifeDays);
-            this.cardManager = new EphemeralCardManager(this.crypto, this.keyHelper, parameters.ServiceInfo);
-            var sessionHelper = new SecureSessionHelper(this.myIdentityCard.Id, parameters.SessionStorage);
+            this.keyStorageManger = new KeyStorageManger(crypto, this.myIdentityCard.Id, parameters.LtPrivateKeyLifeDays);
+            this.cardManager = new EphemeralCardManager(this.crypto, this.keyStorageManger, parameters.ServiceInfo);
+            var sessionHelper = new SessionStorageManager(this.myIdentityCard.Id, parameters.SessionStorage);
             this.sessionManager = new SessionManager(myIdentityCard, myPrivateKey, 
-                crypto, sessionHelper, keyHelper, parameters.SessionLifeDays);
+                crypto, sessionHelper, keyStorageManger, parameters.SessionLifeDays);
         }
 
         public async Task RotateKeysAsync(int desireNumberOfCards = 10)
@@ -53,17 +51,14 @@ namespace Virgil.PFS
         private async Task Cleanup()
         {
             this.sessionManager.RemoveExpiredSessions();
-            this.keyHelper.LtKeyHolder().RemoveExpiredKeys();
-
+            this.keyStorageManger.LtKeyStorage().RemoveExpiredKeys();
             await this.RemoveExhaustedOtKeys();
         }
 
 
-
         private async Task RemoveExhaustedOtKeys()
         {
-            //remove exhausted otcards, which don't belong to any session states more than 1 day
-            var otKeys = this.keyHelper.OtKeyHolder().AllKeys();
+            var otKeys = this.keyStorageManger.OtKeyStorage().AllKeys();
             if (otKeys.Count > 0)
             {
                 var exhaustedOtCardIds = await this.cardManager.ValidateOtCards(this.myIdentityCard.Id, otKeys.Keys);
@@ -73,13 +68,13 @@ namespace Virgil.PFS
                 {
                     if (otKey.Value.ExpiredAt == null)
                     {
-                        this.keyHelper.OtKeyHolder().SetUpExpiredAt(otKey.Key);
+                        this.keyStorageManger.OtKeyStorage().SetUpExpiredAt(otKey.Key);
                     }
                     else
                     {
                         if (otKey.Value.ExpiredAt <= DateTime.Now)
                         {
-                            this.keyHelper.OtKeyHolder().RemoveKey(otKey.Key);
+                            this.keyStorageManger.OtKeyStorage().RemoveKey(otKey.Key);
                         }
                     }
                 }
@@ -87,7 +82,7 @@ namespace Virgil.PFS
         }
 
 
-        public async Task<CoreSession> StartNewSessionWithAsync(CardModel recipientCard, byte[] additionalData = null)
+        public async Task<SecureSession> StartNewSessionWithAsync(CardModel recipientCard, byte[] additionalData = null)
         {
             this.sessionManager.CheckExistingSession(recipientCard.Id);
             var credentials = await this.cardManager.GetCredentialsByIdentityCard(recipientCard);
@@ -96,7 +91,7 @@ namespace Virgil.PFS
         }
 
 
-        public CoreSession ActiveSession(string recipientCardId)
+        public SecureSession ActiveSession(string recipientCardId)
         {
             return this.sessionManager.GetActiveSession(recipientCardId);
         }
@@ -106,7 +101,7 @@ namespace Virgil.PFS
             this.sessionManager.RemoveSession(recipientCardId);
         }
 
-        public async Task<CoreSession> LoadUpSession(CardModel recipientCard, string msg, byte[] additionalData = null)
+        public async Task<SecureSession> LoadUpSession(CardModel recipientCard, string msg, byte[] additionalData = null)
         {
             if (MessageHelper.IsInitialMessage(msg))
             {
@@ -130,7 +125,7 @@ namespace Virgil.PFS
             }
         }
 
-        private CoreSession TryToRecoverSessionByMessage(string recipientCardId, string msg)
+        private SecureSession TryToRecoverSessionByMessage(string recipientCardId, string msg)
         {
             var message = MessageHelper.ExtractMessage(msg);
             return this.sessionManager.LoadUpSession(message.SessionId, recipientCardId);
@@ -139,8 +134,8 @@ namespace Virgil.PFS
         public void GentleReset()
         {
             this.sessionManager.RemoveAllSessions();
-            this.keyHelper.OtKeyHolder().RemoveAllKeys();
-            this.keyHelper.LtKeyHolder().RemoveAllKeys();
+            this.keyStorageManger.OtKeyStorage().RemoveAllKeys();
+            this.keyStorageManger.LtKeyStorage().RemoveAllKeys();
         } 
     }
 }

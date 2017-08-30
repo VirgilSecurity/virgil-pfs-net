@@ -23,10 +23,10 @@ namespace Virgil.PFS
         [JsonProperty("responder_otc_id")]
         public String ResponderOtcId;
 
-        [JsonProperty("initiator_eph_key")]
+        [JsonProperty("eph")]
         public byte[] EphPublicKey;
 
-        [JsonProperty("initiator_sign")]
+        [JsonProperty("sign")]
         public byte[] EphPublicKeySignature;
 
         [JsonProperty("salt")]

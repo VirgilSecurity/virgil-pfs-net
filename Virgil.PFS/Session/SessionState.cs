@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Virgil.PFS.Session
 {
-    public class SessionState
+    internal class SessionState
     {
         [JsonProperty("additional_data")]
         public byte[] AdditionalData { get; protected set; }

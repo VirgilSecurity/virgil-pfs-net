@@ -6,13 +6,13 @@ using Virgil.SDK.Storage;
 
 namespace Virgil.PFS.KeyUtils
 {
-    internal class SessionKeyHolder
+    internal class SessionKeyStorage
     {
         protected IKeyStorage keyStorage;
         protected string ownerId;
         protected string expiredFieldName = "expired_at";
 
-        public SessionKeyHolder(string ownerCardId)
+        public SessionKeyStorage(string ownerCardId)
         {
             this.keyStorage = new DefaultKeyStorage();
             this.ownerId = ownerCardId;
@@ -70,5 +70,6 @@ namespace Virgil.PFS.KeyUtils
             var keyPaths = Array.FindAll(this.keyStorage.Names(), s => s.Contains(this.StoragePrefixForCurrentOwner()));
             return (keyPaths.Length > 0);
         }
+
     }
 }

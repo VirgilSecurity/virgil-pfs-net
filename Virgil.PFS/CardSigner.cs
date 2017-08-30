@@ -2,7 +2,7 @@
 
 namespace Virgil.PFS
 {
-    public class CardSigner
+    internal class CardSigner
     {
         public string CardId { get; set; }
         public IPrivateKey PrivateKey { get; set; }

@@ -5,7 +5,7 @@ namespace Virgil.PFS
 {
     using Newtonsoft.Json;
 
-    public class RecipientModel
+    internal class RecipientModel
     {
         [JsonProperty("long_time_card")]
         public CardModel LTCard { get; set; }

@@ -6,16 +6,16 @@
     using System.Linq;
 
 
-    public class SecureSessionHelper
+    internal class SessionStorageManager
     {
         private string ownerCardId;
-        private IUserDataStorage sessionStateHolder;
+        private IUserDataStorage sessionStorage;
 
-        public SecureSessionHelper(string cardId, IUserDataStorage sessionStorage)
+        public SessionStorageManager(string cardId, IUserDataStorage sessionStorage)
         {
             this.ownerCardId = cardId;
 
-            this.sessionStateHolder = sessionStorage;
+            this.sessionStorage = sessionStorage;
         }
         private string GetSessionPathPrefix()
         {
@@ -29,7 +29,7 @@
         public SessionState GetSessionState(string cardId)
         {
             var stateSessionPath = this.GetSessionPath(cardId);
-            var sessionStateJson = this.sessionStateHolder.Load(stateSessionPath);
+            var sessionStateJson = this.sessionStorage.Load(stateSessionPath);
             return JsonSerializer.Deserialize<SessionState>(sessionStateJson, true);
         }
 
@@ -55,7 +55,7 @@
         {
             var cardIds = new List<string>();
 
-            var sessionStatePaths = this.sessionStateHolder.LoadAllNames();
+            var sessionStatePaths = this.sessionStorage.LoadAllNames();
             var ownerStatePaths = Array.FindAll(
                 sessionStatePaths, s => s.Contains(this.GetSessionPathPrefix()));
             foreach(var sessionStatePath in ownerStatePaths)
@@ -71,17 +71,17 @@
 
         public void DeleteSessionState(string cardId)
         {
-            this.sessionStateHolder.Delete(this.GetSessionPath(cardId));
+            this.sessionStorage.Delete(this.GetSessionPath(cardId));
         }
 
         public bool ExistSessionState(string cardId)
         {
-            return this.sessionStateHolder.Exists(this.GetSessionPath(cardId));
+            return this.sessionStorage.Exists(this.GetSessionPath(cardId));
         }
 
         public void SaveSessionState(SessionState sessionState, string cardId)
         {
-            this.sessionStateHolder.Save(JsonSerializer.Serialize(sessionState), this.GetSessionPath(cardId));
+            this.sessionStorage.Save(JsonSerializer.Serialize(sessionState), this.GetSessionPath(cardId));
         }
 
         public struct SessionInfo

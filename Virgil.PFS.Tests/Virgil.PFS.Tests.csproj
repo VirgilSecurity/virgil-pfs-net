@@ -67,7 +67,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EncryptionTests.cs" />
     <Compile Include="IntegrationHelper.cs" />
+    <Compile Include="LoadUpSessionTests.cs" />
     <Compile Include="StartUpSessionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

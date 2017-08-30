@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Virgil.PFS
 {
-    public class OTCsCountModel
+    internal class OTCsCountModel
     {
         [JsonProperty("active")]
         public int Active { get; set; }

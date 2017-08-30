@@ -29,7 +29,7 @@ namespace Virgil.PFS
         {
             if (!this.Exists(cardId))
             {
-                throw new SecureSessionHolderException("Session state is not found.");
+                throw new SessionStorageException("Session state is not found.");
             }
             var entry = this.keyStorage.Load(cardId);
             return Encoding.UTF8.GetString(entry.Value, 0, entry.Value.Count());
@@ -71,7 +71,7 @@ namespace Virgil.PFS
         {
             if (!this.Exists(cardId))
             {
-                throw new SecureSessionHolderException("Session state is not found.");
+                throw new SessionStorageException("Session state is not found.");
             }
 
             this.keyStorage.Delete(cardId);

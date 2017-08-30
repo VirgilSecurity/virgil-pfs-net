@@ -9,10 +9,10 @@ using Virgil.SDK.Storage;
 
 namespace Virgil.PFS
 {
-    internal class LtKeyHolder : KeyHolder
+    internal class LtKeyStorage : KeyStorage
     {
         private readonly int ltPrivateKeyLifeDays;
-        public LtKeyHolder(ICrypto crypto, string ownerCardId, int ltKeyLifeDays) : base(crypto, ownerCardId)
+        public LtKeyStorage(ICrypto crypto, string ownerCardId, int ltKeyLifeDays) : base(crypto, ownerCardId)
         {
             this.ltPrivateKeyLifeDays = ltKeyLifeDays;
         }
@@ -35,7 +35,7 @@ namespace Virgil.PFS
                 Value = crypto.ExportPrivateKey(privateKey),
                 MetaData = meta
             };
-            this.keyStorage.Store(keyEntry);
+            this.coreKeyStorage.Store(keyEntry);
         }
 
         public bool IsWaitingForNewKey()
@@ -44,16 +44,16 @@ namespace Virgil.PFS
         }
         public void RemoveExpiredKeys()
         {
-            var paths = Array.FindAll(this.keyStorage.Names(), s => s.Contains(this.StoragePrefixForCurrentOwner()));
+            var paths = Array.FindAll(this.coreKeyStorage.Names(), s => s.Contains(this.StoragePrefixForCurrentOwner()));
 
             foreach (var path in paths)
             {
-                var key = this.keyStorage.Load(path);
+                var key = this.coreKeyStorage.Load(path);
                 var expiredAt = GetDateTime(key.MetaData[this.expiredFieldName]);
                 
                 if (DateTime.Now >= expiredAt)
                 {
-                    this.keyStorage.Delete(path);
+                    this.coreKeyStorage.Delete(path);
                 }
             }
         }

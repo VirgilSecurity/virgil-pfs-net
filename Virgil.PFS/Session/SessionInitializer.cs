@@ -10,7 +10,7 @@ using Virgil.SDK.Cryptography;
 
 namespace Virgil.PFS.Session
 {
-    class SessionInitializer
+    internal class SessionInitializer
     {
         private readonly ICrypto crypto;
         private readonly IPrivateKey identityPrivateKey;
@@ -23,7 +23,7 @@ namespace Virgil.PFS.Session
             this.identityPrivateKey = identityPrivateKey;
         }
 
-        public CoreSession InitializeInitiatorSession(CardModel recipientCard,
+        public SecureSession InitializeInitiatorSession(CardModel recipientCard,
             CredentialsModel recipientCredentials,
             byte[] additionalData, DateTime expiredAt)
         {
@@ -42,12 +42,13 @@ namespace Virgil.PFS.Session
             }
 
             var initialMessageGenerator = GetInitialMessageGenerator(
+                recipientCard.Id,
                 recipientCredentials.LTCard.Id,
                 recipientCredentials.OTCard?.Id,
-                ephemeralKeyPair.PrivateKey,
-                ephPrivateKeyData);
+                ephemeralKeyPair.PrivateKey
+                );
 
-            var session = new CoreSession(
+            var session = new SecureSession(
                 recipientPfsPublicKey,
                 recipientPfsLtPublicKey,
                 recipientPfsOtPublicKey,
@@ -69,26 +70,35 @@ namespace Virgil.PFS.Session
             return new VirgilPFSInitiatorPrivateInfo(pfsPrivateKey, pfsEphPrivateKey);
         }
 
-        private InitialMessageGenerator GetInitialMessageGenerator(string responderIcId, string responderOtId,
-            IPrivateKey privateKey, byte[] ephPrivateKeyData)
+        private InitialMessageGenerator GetInitialMessageGenerator(string responderIcId, 
+            string responderLtId, 
+            string responderOtId,
+            IPrivateKey ephPrivateKey)
         {
-            var myEphPublicKey = this.crypto.ExtractPublicKey(privateKey);
+            var myEphPublicKey = this.crypto.ExtractPublicKey(ephPrivateKey);
             var myEphPublicKeyData = this.crypto.ExportPublicKey(myEphPublicKey);
+
             var signForEphPublicKey = this.crypto.Sign(myEphPublicKeyData, this.identityPrivateKey);
             var initialMessageGenerator = new InitialMessageGenerator()
             {
-                EphPublicKey = ephPrivateKeyData,
+                EphPublicKey = myEphPublicKeyData,
                 EphPublicKeySignature = signForEphPublicKey,
                 InitiatorIcId = this.identityCard.Id,
                 ResponderIcId = responderIcId,
-                ResponderOtcId = responderOtId
+                ResponderOtcId = responderOtId,
+                ResponderLtcId = responderLtId
             };
             return initialMessageGenerator;
         }
 
 
-        public CoreSession InitializeResponderSession(byte[] initiatorPublicKeyData, byte[] initiatorEphKey, byte[] additionalData, byte[] myLtPrivateKey,
-            byte[] myOtPrivateKeyData, byte[] myPrivateKeyData, DateTime expiredAt)
+        public SecureSession InitializeResponderSession(byte[] initiatorPublicKeyData, 
+            byte[] initiatorEphKey, 
+            byte[] additionalData, 
+            byte[] myLtPrivateKey,
+            byte[] myOtPrivateKeyData, 
+            byte[] myPrivateKeyData,
+            DateTime expiredAt)
         {
             var pfsLtPrivateKey = new VirgilPFSPrivateKey(myLtPrivateKey);
             var pfsPrivateKey = new VirgilPFSPrivateKey(myPrivateKeyData);
@@ -102,7 +112,7 @@ namespace Virgil.PFS.Session
                 pfsOtPrivateKey = new VirgilPFSPrivateKey(myOtPrivateKeyData);
             }
 
-            return new CoreSession(pfsOtPrivateKey,
+            return new SecureSession(pfsOtPrivateKey,
                initiatorIdentityPublicKey,
                initiatorEphPublicKey,
                pfsPrivateKey,

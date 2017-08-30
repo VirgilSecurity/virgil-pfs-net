@@ -2,7 +2,7 @@
 {
     using Virgil.SDK.Cryptography;
 
-    public class EphemeralCardParams
+    internal class EphemeralCardParams
     {
         public string Identity { get; set; }
         public IPublicKey PublicKey { get; set; }

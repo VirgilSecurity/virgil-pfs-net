@@ -9,7 +9,7 @@ using Virgil.PFS.Client.Models;
 namespace Virgil.PFS.Client
 {
     [DataContract]
-    public class EphemeralCardRequest
+    internal class EphemeralCardRequest
     {
         [DataMember(Name = "content_snapshot")]
         public byte[] ContentSnapshot { get; internal set; }

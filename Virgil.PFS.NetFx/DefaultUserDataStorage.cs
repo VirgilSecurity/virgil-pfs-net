@@ -29,7 +29,7 @@
         {
             if (!this.Exists(cardId))
             {
-                throw new SecureSessionHolderException("Session state is not found.");
+                throw new SessionStorageException("Session state is not found.");
             }
             var jsonBytes = File.ReadAllBytes(this.GetSessionStatePath(cardId));
             var sessionStateJson = Encoding.UTF8.GetString(jsonBytes);
@@ -66,7 +66,7 @@
 
             if (this.Exists(cardId))
             {
-                throw new SecureSessionHolderException("Secure station already exist");
+                throw new SessionStorageException("Secure station already exist");
             }
 
             var sessionStateBytes = Encoding.UTF8.GetBytes(sessionStateJson);
@@ -80,7 +80,7 @@
         {
             if (!this.Exists(cardId))
             {
-                throw new SecureSessionHolderException("Session state is not found.");
+                throw new SessionStorageException("Session state is not found.");
             }
 
             File.Delete(this.GetSessionStatePath(cardId));

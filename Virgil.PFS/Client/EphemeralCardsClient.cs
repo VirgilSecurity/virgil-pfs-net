@@ -8,7 +8,7 @@ namespace Virgil.PFS
     using Virgil.PFS.Client.Connection;
     using Virgil.SDK.Client;
 
-    public class EphemeralCardsClient
+    internal class EphemeralCardsClient
     {
         private readonly string accessToken;
         private readonly Lazy<IConnection> pfsLazyConnection;

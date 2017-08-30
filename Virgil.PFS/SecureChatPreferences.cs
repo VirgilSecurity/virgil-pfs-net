@@ -1,12 +1,12 @@
-﻿using Virgil.PFS.Exceptions;
-using Virgil.PFS.Session;
-using Virgil.PFS.Session.Default;
-using Virgil.SDK.Client;
-using Virgil.SDK.Cryptography;
-
-namespace Virgil.PFS
+﻿namespace Virgil.PFS
 {
-    public class SecureChatParams
+    using Virgil.PFS.Exceptions;
+    using Virgil.PFS.Session;
+    using Virgil.PFS.Session.Default;
+    using Virgil.SDK.Client;
+    using Virgil.SDK.Cryptography;
+
+    public class SecureChatPreferences
     {
         private const int SessionToBeAliveDays = 5;
         private const int LongTermPrivateKeyToBeAliveDays = 10;
@@ -18,7 +18,7 @@ namespace Virgil.PFS
         public int SessionLifeDays { get; protected set; }
         public IUserDataStorage SessionStorage { get; set; }
 
-        public SecureChatParams(ICrypto crypto,
+        public SecureChatPreferences(ICrypto crypto,
             CardModel identityCard,
             IPrivateKey identityPrivateKey,
             ServiceInfo serviceInfo,
@@ -32,12 +32,12 @@ namespace Virgil.PFS
             this.ServiceInfo = serviceInfo;
             if (longTermPrivateKeyToBeAliveDays < sessionToBeAliveDays)
             {
-                throw new SecureSessionHolderException(
+                throw new SessionStorageException(
                     "Sorry! Long term private key can't live less than session.");
             }
             if (sessionToBeAliveDays < 1)
             {
-                throw new SecureSessionHolderException("Very short session's lifetime.");
+                throw new SessionStorageException("Very short session's lifetime.");
             }
             this.LtPrivateKeyLifeDays = longTermPrivateKeyToBeAliveDays;
             this.SessionLifeDays = sessionToBeAliveDays;
@@ -45,7 +45,7 @@ namespace Virgil.PFS
             this.SessionStorage = new DefaultUserDataStorage();
         }
 
-        public SecureChatParams(ICrypto crypto,
+        public SecureChatPreferences(ICrypto crypto,
             CardModel identityCard,
             IPrivateKey identityPrivateKey,
             string accessToken,

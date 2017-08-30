@@ -9,7 +9,7 @@ using Virgil.PFS.Client.Models;
 namespace Virgil.PFS
 {
     [DataContract]
-    public class EphemeralCardsRequest
+    internal class EphemeralCardsRequest
     {
 
         [DataMember(Name = "long_time_card")]

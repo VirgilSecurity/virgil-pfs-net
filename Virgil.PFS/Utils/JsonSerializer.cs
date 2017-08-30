@@ -12,7 +12,7 @@ namespace Virgil.PFS.Client
     /// Serializes objects to the JavaScript Object Notation (JSON) and 
     /// deserializes JSON data to objects. 
     /// </summary>
-    public class JsonSerializer
+    internal class JsonSerializer
     {
         private static readonly JsonSerializerSettings SettingsWithMissingError = new JsonSerializerSettings
         {

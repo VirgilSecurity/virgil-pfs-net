@@ -7,10 +7,10 @@ using Virgil.SDK.Cryptography;
 
 namespace Virgil.PFS
 {
-    internal class OtKeyHolder : KeyHolder
+    internal class OtKeyStorage : KeyStorage
     {
         private int otLifeDaysAfterExhausting = 1;
-        public OtKeyHolder(ICrypto crypto, string ownerCardId) : base(crypto, ownerCardId)
+        public OtKeyStorage(ICrypto crypto, string ownerCardId) : base(crypto, ownerCardId)
         {
         }
 
@@ -21,13 +21,13 @@ namespace Virgil.PFS
 
         public void SetUpExpiredAt(string cardId)
         {
-            var keyEntry = this.keyStorage.Load(this.PathToKey(cardId));
-            this.keyStorage.Delete(this.PathToKey(cardId));
+            var keyEntry = this.coreKeyStorage.Load(this.PathToKey(cardId));
+            this.coreKeyStorage.Delete(this.PathToKey(cardId));
             keyEntry.MetaData = new Dictionary<string, string>
             {
                 {expiredFieldName, GetTimestamp(DateTime.Now.AddDays(this.otLifeDaysAfterExhausting))}
             };
-            this.keyStorage.Store(keyEntry);
+            this.coreKeyStorage.Store(keyEntry);
         }
     }
 }

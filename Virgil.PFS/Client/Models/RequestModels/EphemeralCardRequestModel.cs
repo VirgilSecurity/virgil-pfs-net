@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Virgil.PFS.Client.Models
 {
-    public class EphemeralCardRequestModel
+    internal class EphemeralCardRequestModel
     {
         [JsonProperty("content_snapshot")]
         public byte[] ContentSnapshot { get; set; }

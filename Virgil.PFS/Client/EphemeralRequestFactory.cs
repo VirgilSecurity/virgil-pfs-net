@@ -8,7 +8,7 @@ using Virgil.SDK.Cryptography;
 
 namespace Virgil.PFS
 {
-    public class EphemeralRequestFactory
+    internal class EphemeralRequestFactory
     {
         private readonly ICrypto crypto;
         private readonly RequestSigner requestSigner;
