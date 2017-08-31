@@ -1,6 +1,8 @@
-﻿namespace Virgil.PFS.Session.Default
+﻿using Virgil.PFS.Exceptions;
+
+namespace Virgil.PFS.Session.Default
 {
-    using Exceptions;
+    using Virgil.PFS;
     using System;
     using System.IO;
     using System.Linq;

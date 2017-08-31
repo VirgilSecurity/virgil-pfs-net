@@ -38,7 +38,7 @@ namespace Virgil.PFS.Tests
                 bobKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo());
 
-            var sessionStorage = new DefaultUserDataStorage();
+            var sessionStorage = new DefaultUserDataStorage1();
             var sessionHelper = new SessionStorageManager(bobCard.Id, sessionStorage);
             var keyStorageManger = new KeyStorageManger(crypto, bobCard.Id, secureChatParamsForBob.LtPrivateKeyLifeDays);
 
@@ -100,7 +100,7 @@ namespace Virgil.PFS.Tests
                 bobKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo());
 
-            var sessionStorage = new DefaultUserDataStorage();
+            var sessionStorage = new DefaultUserDataStorage1();
             var sessionHelper = new SessionStorageManager(bobCard.Id, sessionStorage);
             var keyStorageManger = new KeyStorageManger(crypto, bobCard.Id, secureChatParamsForBob.LtPrivateKeyLifeDays);
 

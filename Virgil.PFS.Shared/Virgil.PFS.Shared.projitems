@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>8dc70802-4d25-4adb-a467-37aa9c679de8</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Virgil.PFS.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CardSigner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\HttpMethodExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\HttpRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\HttpRequestMethod.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\HttpResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\IConnection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\IRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\IResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\IResponseErrorHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\PfsServiceResponseErrorHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\RequestExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\ResponseExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\ServiceConnection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Connection\ServiceError.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\EphemeralCardParams.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\EphemeralCardRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\EphemeralCardsClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\EphemeralCardsRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\EphemeralRequestFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Models\CredentialsModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Models\OTCsCountModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Models\RecipientModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Models\RequestModels\EphemeralCardRequestMetaModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Models\RequestModels\EphemeralCardRequestModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Models\RequestModels\RecipientRequestModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Client\Models\ValidateOTCsModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EphemeralCardManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\CredentialsException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\MessageExtractionException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\SecureSessionException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\SessionStorageException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KeyStorageManger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KeyUtils\KeyStorage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KeyUtils\LtKeyStorage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KeyUtils\OtKeyStorage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KeyUtils\SessionKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KeyUtils\SessionKeyStorage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\InitialMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\InitialMessageGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\Message.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Message\MessageHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SecureChat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SecureChatPreferences.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Session\IUserDataStorage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Session\SecureSession.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Session\SessionInitializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Session\SessionManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Session\SessionState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Session\SessionStorageManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Session\UserDataSafeStorage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\EphemeralCardValidator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\JsonSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\ServiceInfo.cs" />
+  </ItemGroup>
+</Project>

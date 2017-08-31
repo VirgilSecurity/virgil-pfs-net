@@ -113,7 +113,7 @@ namespace Virgil.PFS.Tests
               DateTime.Now.AddDays(-1),
               new byte[] { });
 
-            var sessionStorage = new DefaultUserDataStorage();
+            var sessionStorage = new DefaultUserDataStorage1();
             var sessionHelper = new SessionStorageManager(aliceCard.Id, sessionStorage);
             var keyStorageManger = new KeyStorageManger(crypto, aliceCard.Id, secureChatParamsForAlice.LtPrivateKeyLifeDays);
             Assert.IsFalse(sessionHelper.ExistSessionState(bobCard.Id));

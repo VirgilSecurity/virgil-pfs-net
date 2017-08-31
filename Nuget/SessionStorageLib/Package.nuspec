@@ -1,0 +1,31 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Virgil.PFS</id>
+    <version>1.0.0-alpha</version>
+    <title>Virgil.PFS</title>
+    <authors>Virgil Security, Inc</authors>
+    <owners>Virgil Security, Inc</owners>
+    <description>
+    PFS
+    </description>
+    <releaseNotes>
+    </releaseNotes>
+    <summary>
+      This cross-platform library contains code to encrypt, decrypt, sign and verify any data.
+    </summary>
+    <language>en-US</language>
+    <projectUrl>https://virgilsecurity.com/</projectUrl>
+    <iconUrl>https://avatars0.githubusercontent.com/u/9740508</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
+    <copyright>© 2016 Virgil Security, Inc.</copyright>
+    <dependencies>
+    </dependencies>
+    <references></references>
+    <tags>Cryptography, Elliptic Curve, Cross Platform</tags>
+  </metadata>
+  <files>
+    <file src="lib\" target="lib" />
+  </files>
+</package>

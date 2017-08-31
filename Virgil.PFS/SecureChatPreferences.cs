@@ -2,7 +2,7 @@
 {
     using Virgil.PFS.Exceptions;
     using Virgil.PFS.Session;
-    using Virgil.PFS.Session.Default;
+   // using Virgil.PFS.Session.Default;
     using Virgil.SDK.Client;
     using Virgil.SDK.Cryptography;
 
@@ -42,7 +42,7 @@
             this.LtPrivateKeyLifeDays = longTermPrivateKeyToBeAliveDays;
             this.SessionLifeDays = sessionToBeAliveDays;
 
-            this.SessionStorage = new DefaultUserDataStorage();
+           // this.SessionStorage = new DefaultUserDataStorage();
         }
 
         public SecureChatPreferences(ICrypto crypto,

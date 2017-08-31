@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Virgil.PFS.NetFx")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Virgil.PFS")]
+[assembly: AssemblyDescription("Perfect Forward Secrecy (PFS) is a technique that protects previously intercepted traffic from being decrypted even if the main private key is compromised. \nWith PFS enabled communication, a hacker could only access information that is actively transmitted because PFS forces a system to create different keys per session.In other words, PFS makes sure there is no master key to decrypt all the traffic.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Virgil.PFS.NetFx")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyCompany("Virgil Security, Inc")]
+[assembly: AssemblyProduct("Virgil.PFS")]
+[assembly: AssemblyCopyright("© 2016 Virgil Security, Inc.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
