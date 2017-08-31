@@ -181,7 +181,7 @@ namespace Virgil.PFS.Session
                     else
                     {
                         throw new SecureSessionException(
-                            "Exist session for given recipient. Try to loadUpSession");
+                            "Exist session for given recipient. Try to ActiveSession.");
                     }
                 }
             }

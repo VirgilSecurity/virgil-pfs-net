@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Virgil.PFS.Session;
-using Virgil.PFS.Session.Default;
 using Virgil.SDK.Cryptography;
 
 namespace Virgil.PFS.Tests
@@ -36,7 +35,7 @@ namespace Virgil.PFS.Tests
                 bobKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo());
 
-            var sessionStorage = new DefaultUserDataStorage1();
+            var sessionStorage = new DefaultUserDataStorage();
 
             var secureChatForAlice = new SecureChat(secureChatParamsForAlice);
             var secureChatForBob = new SecureChat(secureChatParamsForBob);
@@ -88,7 +87,7 @@ namespace Virgil.PFS.Tests
                 bobKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo());
 
-            var sessionStorage = new DefaultUserDataStorage1();
+            var sessionStorage = new DefaultUserDataStorage();
             var sessionHelper = new SessionStorageManager(bobCard.Id, sessionStorage);
             var keyStorageManger = new KeyStorageManger(crypto, bobCard.Id, secureChatParamsForBob.LtPrivateKeyLifeDays);
 

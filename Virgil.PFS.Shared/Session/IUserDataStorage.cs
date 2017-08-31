@@ -14,4 +14,6 @@ namespace Virgil.PFS.Session
         bool Exists(string cardId);
         string[] LoadAllNames();
     }
+
+
 }

@@ -12,7 +12,6 @@ using Virgil.PFS.Exceptions;
 using Virgil.PFS;
 using Virgil.PFS.KeyUtils;
 using Virgil.PFS.Session;
-using Virgil.PFS.Session.Default;
 
 namespace Virgil.PFS.Tests
 {
@@ -113,7 +112,7 @@ namespace Virgil.PFS.Tests
               DateTime.Now.AddDays(-1),
               new byte[] { });
 
-            var sessionStorage = new DefaultUserDataStorage1();
+            var sessionStorage = new DefaultUserDataStorage();
             var sessionHelper = new SessionStorageManager(aliceCard.Id, sessionStorage);
             var keyStorageManger = new KeyStorageManger(crypto, aliceCard.Id, secureChatParamsForAlice.LtPrivateKeyLifeDays);
             Assert.IsFalse(sessionHelper.ExistSessionState(bobCard.Id));

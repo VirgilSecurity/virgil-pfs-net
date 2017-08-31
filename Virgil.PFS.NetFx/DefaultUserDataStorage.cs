@@ -1,6 +1,6 @@
 ﻿using Virgil.PFS.Exceptions;
 
-namespace Virgil.PFS.Session.Default
+namespace Virgil.PFS.Session
 {
     using Virgil.PFS;
     using System;
