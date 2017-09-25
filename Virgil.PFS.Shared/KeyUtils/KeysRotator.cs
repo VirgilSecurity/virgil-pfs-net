@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Virgil.SDK.Client;
 using Virgil.SDK.Cryptography;
 
@@ -19,7 +20,7 @@ namespace Virgil.PFS.Shared.KeyUtils
             this.identityCard = myIdentityCard;
         }
 
-        public async void Rotate(int desireNumberOfCards)
+        public async Task Rotate(int desireNumberOfCards)
         {
             var numberOfOtCard = await this.cardManager.GetOtCardsCount(this.identityCard.Id);
             var missingCards = ((desireNumberOfCards - numberOfOtCard.Active) > 0)

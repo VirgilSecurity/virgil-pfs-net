@@ -41,7 +41,7 @@ namespace Virgil.PFS
         public async Task RotateKeysAsync(int desireNumberOfCards = 10)
         {
            await this.Cleanup();
-           this.keysRotator.Rotate(desireNumberOfCards);
+           await this.keysRotator.Rotate(desireNumberOfCards);
         }
 
         private async Task Cleanup()
