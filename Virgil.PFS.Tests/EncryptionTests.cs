@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Virgil.PFS.Session;
 using Virgil.SDK.Cryptography;
+using Virgil.SDK.Exceptions;
+using Virgil.SDK.Storage;
 
 namespace Virgil.PFS.Tests
 {
@@ -17,6 +19,7 @@ namespace Virgil.PFS.Tests
             var crypto = new VirgilCrypto();
 
             var aliceKeys = crypto.GenerateKeys();
+            
             var bobKeys = crypto.GenerateKeys();
 
             var aliceCard = await IntegrationHelper.CreateCard("Alice" + Guid.NewGuid(), aliceKeys);
