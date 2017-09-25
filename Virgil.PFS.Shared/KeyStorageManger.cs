@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,9 +36,17 @@ namespace Virgil.PFS
         {
             return this.ltKeyStorage;
         }
+
         internal OtKeyStorage OtKeyStorage()
         {
             return this.otKeyStorage;
         }
+
+        internal void RemoveAllOtLtKeys()
+        {
+            this.OtKeyStorage().RemoveAllKeys();
+            this.LtKeyStorage().RemoveAllKeys();
+        } 
+
     }
 }

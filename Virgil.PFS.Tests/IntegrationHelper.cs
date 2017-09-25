@@ -52,7 +52,7 @@ namespace Virgil.PFS.Tests
 
             requestSigner.SelfSign(request, keyPair.PrivateKey);
             requestSigner.AuthoritySign(request, IntegrationHelper.AppID, appKey);
-
+            
             return await client.PublishCardAsync(request);
         }
 

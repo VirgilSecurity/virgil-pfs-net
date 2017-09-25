@@ -139,5 +139,31 @@ namespace Virgil.PFS
             var snapshotFingerprint = this.crypto.CalculateFingerprint(takenSnapshot);
             return snapshotFingerprint.ToHEX();
         }
+
+        public async Task RemoveKeysForExhaustedOtCards(string identityCardId)
+        {
+            var otKeys = this.keyStorageManger.OtKeyStorage().AllKeys();
+            if (otKeys.Count > 0)
+            {
+                var exhaustedOtCardIds = await this.ValidateOtCards(identityCardId, otKeys.Keys);
+                var otKeysToBeRemoved = otKeys.Where(x => exhaustedOtCardIds.Contains(x.Key))
+                    .ToDictionary(p => p.Key, p => p.Value);
+                foreach (var otKey in otKeysToBeRemoved)
+                {
+                    if (otKey.Value.ExpiredAt == null)
+                    {
+                        this.keyStorageManger.OtKeyStorage().SetUpExpiredAt(otKey.Key);
+                    }
+                    else
+                    {
+                        if (otKey.Value.ExpiredAt <= DateTime.Now)
+                        {
+                            this.keyStorageManger.OtKeyStorage().RemoveKey(otKey.Key);
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

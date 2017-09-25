@@ -7,6 +7,7 @@ using Virgil.PFS.Client;
 using Virgil.PFS.Exceptions;
 using Virgil.PFS.KeyUtils;
 using Virgil.PFS.Session;
+using Virgil.PFS.Shared.KeyUtils;
 using Virgil.SDK.Client;
 using Virgil.SDK.Common;
 using Virgil.SDK.Cryptography;
@@ -22,6 +23,7 @@ namespace Virgil.PFS
         private readonly EphemeralCardManager cardManager;
         private readonly KeyStorageManger keyStorageManger;
         private readonly SessionManager sessionManager;
+        private readonly KeysRotator keysRotator;
 
         public SecureChat(SecureChatPreferences parameters)
         {
@@ -33,52 +35,20 @@ namespace Virgil.PFS
             var sessionHelper = new SessionStorageManager(this.myIdentityCard.Id, parameters.SessionStorage);
             this.sessionManager = new SessionManager(myIdentityCard, myPrivateKey, 
                 crypto, sessionHelper, keyStorageManger, parameters.SessionLifeDays);
+            this.keysRotator = new KeysRotator(this.myIdentityCard, this.myPrivateKey, this.cardManager);
         }
 
         public async Task RotateKeysAsync(int desireNumberOfCards = 10)
         {
-            await this.Cleanup();
-            var numberOfOtCard = await this.cardManager.GetOtCardsCount(this.myIdentityCard.Id);
-            var missingCards = ((desireNumberOfCards - numberOfOtCard.Active) > 0)
-                ? (desireNumberOfCards - numberOfOtCard.Active) : 0;
-            await cardManager.BootstrapCardsSet(
-                this.myIdentityCard,
-                this.myPrivateKey,
-                missingCards
-                );
+           await this.Cleanup();
+           this.keysRotator.Rotate(desireNumberOfCards);
         }
 
         private async Task Cleanup()
         {
             this.sessionManager.RemoveExpiredSessions();
             this.keyStorageManger.LtKeyStorage().RemoveExpiredKeys();
-            await this.RemoveExhaustedOtKeys();
-        }
-
-
-        private async Task RemoveExhaustedOtKeys()
-        {
-            var otKeys = this.keyStorageManger.OtKeyStorage().AllKeys();
-            if (otKeys.Count > 0)
-            {
-                var exhaustedOtCardIds = await this.cardManager.ValidateOtCards(this.myIdentityCard.Id, otKeys.Keys);
-                var otKeysToBeRemoved = otKeys.Where(x => exhaustedOtCardIds.Contains(x.Key))
-                    .ToDictionary(p => p.Key, p => p.Value);
-                foreach (var otKey in otKeysToBeRemoved)
-                {
-                    if (otKey.Value.ExpiredAt == null)
-                    {
-                        this.keyStorageManger.OtKeyStorage().SetUpExpiredAt(otKey.Key);
-                    }
-                    else
-                    {
-                        if (otKey.Value.ExpiredAt <= DateTime.Now)
-                        {
-                            this.keyStorageManger.OtKeyStorage().RemoveKey(otKey.Key);
-                        }
-                    }
-                }
-            }
+            await this.cardManager.RemoveKeysForExhaustedOtCards(this.myIdentityCard.Id);
         }
 
 
@@ -134,8 +104,7 @@ namespace Virgil.PFS
         public void GentleReset()
         {
             this.sessionManager.RemoveAllSessions();
-            this.keyStorageManger.OtKeyStorage().RemoveAllKeys();
-            this.keyStorageManger.LtKeyStorage().RemoveAllKeys();
+            this.keyStorageManger.RemoveAllOtLtKeys();
         } 
     }
 }

@@ -16,14 +16,12 @@ namespace Virgil.PFS.Session
         private readonly KeyStorageManger keyStorageManger;
         private readonly ICrypto crypto;
         private readonly IPrivateKey identityPrivateKey;
-        private readonly CardModel identityCard;
         private readonly int sessionLifeDays;
         private readonly SessionInitializer sessionInitializer;
         public SessionManager(CardModel identityCard, 
             IPrivateKey identityPrivateKey, ICrypto crypto,
             SessionStorageManager sessionStorageManager, KeyStorageManger keyStorageManger, int sessionLifeDays)
         {
-            this.identityCard = identityCard;
             this.identityPrivateKey = identityPrivateKey;
             this.crypto = crypto;
             this.sessionStorageManager = sessionStorageManager;

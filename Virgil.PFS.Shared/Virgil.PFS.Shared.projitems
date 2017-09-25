@@ -41,6 +41,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions\SecureSessionException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions\SessionStorageException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KeyStorageManger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)KeyUtils\KeysRotator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KeyUtils\KeyStorage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KeyUtils\LtKeyStorage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)KeyUtils\OtKeyStorage.cs" />
