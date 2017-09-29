@@ -4,84 +4,118 @@
     using System.Collections.Generic;
     using Virgil.PFS.Client;
     using System.Linq;
-
+    using Exceptions;
 
     internal class SessionStorageManager
     {
-        private string ownerCardId;
         private IUserDataStorage sessionStorage;
 
-        public SessionStorageManager(string cardId, IUserDataStorage sessionStorage)
+        public SessionStorageManager(IUserDataStorage sessionStorage)
         {
-            this.ownerCardId = cardId;
-
             this.sessionStorage = sessionStorage;
         }
-        private string GetSessionPathPrefix()
+
+        public SessionState GetNewestSessionState(string recipientCardId)
         {
-            return $"{ownerCardId}--";
-        }
-        private string GetSessionPath(string cardId)
-        {
-            return this.GetSessionPathPrefix() + cardId;
+            try
+            {
+                var sessionState = GetSessionStates(recipientCardId)
+                    .OrderByDescending(el => el.ExpiredAt).FirstOrDefault();
+                return sessionState;
+            }
+            catch (Exception)
+            {
+                throw new SessionStorageException("Session isn't found.");
+            }
         }
 
-        public SessionState GetSessionState(string cardId)
+        public SessionState[] GetSessionStates(string recipientCardId)
         {
-            var stateSessionPath = this.GetSessionPath(cardId);
-            var sessionStateJson = this.sessionStorage.Load(stateSessionPath);
-            return JsonSerializer.Deserialize<SessionState>(sessionStateJson, true);
+            try
+            {
+                var sessionStatesJson = this.sessionStorage.Load(recipientCardId);
+                return JsonSerializer.Deserialize<SessionState[]>(sessionStatesJson, true);
+            }
+            catch (Exception)
+            {
+                throw new SessionStorageException("There isn't any session for this recipient.");
+            }
         }
 
         public List<SessionInfo> GetAllSessionStates()
         {
             var sessionStates = new List<SessionInfo>();
-            foreach (var sessionStateName in this.GetAllSessionStateIds())
+            foreach (var recipientId in this.sessionStorage.LoadAllNames())
             {
-                var sessionState = this.GetSessionState(sessionStateName);
-                var el = new SessionInfo()
+                var recipientSessionStates = this.GetSessionStates(recipientId);
+                
+                foreach(var sessionState in recipientSessionStates)
                 {
-                    CardId = sessionStateName,
-                    SessionState = sessionState
-                };
-                sessionStates.Add(el);
+                    var el = new SessionInfo()
+                    {
+                        CardId = recipientId,
+                        SessionState = sessionState
+                    };
+                    sessionStates.Add(el);
+                }
             }
             return sessionStates;
-
         }
 
 
-        public string[] GetAllSessionStateIds()
+        public void RemoveAllSessionStates()
         {
-            var cardIds = new List<string>();
-
-            var sessionStatePaths = this.sessionStorage.LoadAllNames();
-            var ownerStatePaths = Array.FindAll(
-                sessionStatePaths, s => s.Contains(this.GetSessionPathPrefix()));
-            foreach(var sessionStatePath in ownerStatePaths)
+            foreach (var recipientCardId in this.sessionStorage.LoadAllNames())
             {
-                string cardId = sessionStatePath.Split(
-                    new string[] { this.GetSessionPathPrefix() }, 
-                    StringSplitOptions.None).Last();
-                cardIds.Add(cardId);
+                this.DeleteSessionStates(recipientCardId);
             }
-
-            return cardIds.ToArray();
         }
 
-        public void DeleteSessionState(string cardId)
+        public void DeleteSessionStates(string recipientCardId)
         {
-            this.sessionStorage.Delete(this.GetSessionPath(cardId));
+            try
+            {
+                this.sessionStorage.Delete(recipientCardId);
+            }
+            catch (Exception)
+            {
+                throw new SessionStorageException("Session isn't found.");
+            }
         }
 
-        public bool ExistSessionState(string cardId)
+
+        public bool ExistSessionState(string recipientCardId, string sessionId)
         {
-            return this.sessionStorage.Exists(this.GetSessionPath(cardId));
+            if (this.sessionStorage.Exists(recipientCardId))
+            {
+                var sessionStates = this.GetSessionStates(recipientCardId);
+            }
+            return false;
         }
 
-        public void SaveSessionState(SessionState sessionState, string cardId)
+        public bool ExistSessionStates(string recipientCardId)
         {
-            this.sessionStorage.Save(JsonSerializer.Serialize(sessionState), this.GetSessionPath(cardId));
+            return this.sessionStorage.Exists(recipientCardId);
+        }
+
+        public void SaveSessionState(SessionState sessionState, string recipientCardId)
+        {
+            if (this.sessionStorage.Exists(recipientCardId))
+            {
+                var sessionStates = this.GetSessionStates(recipientCardId);
+                if (sessionStates.Any(el => el.SessionId == sessionState.SessionId))
+                {
+                    throw new SessionStorageException("Session already exist");
+                }
+                var sessionStatesList = sessionStates.ToList();
+                sessionStatesList.Add(sessionState);
+                var sessionStatesJson = JsonSerializer.Serialize(sessionStatesList);
+                this.sessionStorage.Update(sessionStatesJson, recipientCardId);
+            }
+            else
+            {
+                this.sessionStorage.Save(JsonSerializer.Serialize(sessionState), recipientCardId);
+            }
         }
 
         public struct SessionInfo
@@ -89,6 +123,5 @@
             public string CardId;
             public SessionState SessionState;
         }
-
     }
 }

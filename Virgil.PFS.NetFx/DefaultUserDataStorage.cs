@@ -15,10 +15,10 @@ namespace Virgil.PFS.Session
         protected string ownerId;
 
 
-        public DefaultUserDataStorage()
+        public DefaultUserDataStorage(string folderName)
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            this.folderPath = Path.Combine(appData, "VirgilSecurity", "Sessions");
+            this.folderPath = Path.Combine(appData, "VirgilSecurity", "Sessions", folderName);
             Directory.CreateDirectory(this.folderPath);
         }
 
@@ -31,11 +31,11 @@ namespace Virgil.PFS.Session
         {
             if (!this.Exists(cardId))
             {
-                throw new SessionStorageException("Session state is not found.");
+                throw new Exception("Session state is not found.");
             }
-            var jsonBytes = File.ReadAllBytes(this.GetSessionStatePath(cardId));
-            var sessionStateJson = Encoding.UTF8.GetString(jsonBytes);
-            return sessionStateJson;
+            var jsonBytes = File.ReadAllBytes(this.GetFilePath(cardId));
+            var dataJson = Encoding.UTF8.GetString(jsonBytes);
+            return dataJson;
         }
 
 
@@ -54,38 +54,53 @@ namespace Virgil.PFS.Session
 
         public bool Exists(string cardId)
         {
-            return File.Exists(this.GetSessionStatePath(cardId));
+            return File.Exists(this.GetFilePath(cardId));
         }
 
-        private string GetSessionStatePath(string alias)
+        private string GetFilePath(string alias)
         {
             return Path.Combine(this.folderPath, alias.ToLower());
         }
 
-        public void Save(string sessionStateJson, string cardId)
+        public void Save(string dataJson, string cardId)
         {
             Directory.CreateDirectory(this.folderPath);
 
             if (this.Exists(cardId))
             {
-                throw new SessionStorageException("Secure station already exist");
+                throw new Exception("Entry already exist");
             }
 
-            var sessionStateBytes = Encoding.UTF8.GetBytes(sessionStateJson);
-
-            var sessionStatePath = this.GetSessionStatePath(cardId);
-
-            File.WriteAllBytes(sessionStatePath, sessionStateBytes);
+            this.WriteToFile(dataJson, this.GetFilePath(cardId));
         }
+
+
+        public void Update(string dataJson, string cardId)
+        {
+            if (!this.Exists(cardId))
+            {
+                throw new Exception("Entry is not found.");
+            }
+            this.WriteToFile(dataJson, this.GetFilePath(cardId));
+        }
+
+
+        private void WriteToFile(string dataJson, string filePath)
+        {
+            var dataBytes = Encoding.UTF8.GetBytes(dataJson);
+
+            File.WriteAllBytes(filePath, dataBytes);
+        }
+
 
         public void Delete(string cardId)
         {
             if (!this.Exists(cardId))
             {
-                throw new SessionStorageException("Session state is not found.");
+                throw new Exception("Entry is not found.");
             }
 
-            File.Delete(this.GetSessionStatePath(cardId));
+            File.Delete(this.GetFilePath(cardId));
         }
 
     }

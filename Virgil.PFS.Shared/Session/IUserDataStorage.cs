@@ -13,7 +13,6 @@ namespace Virgil.PFS.Session
         void Delete(string cardId);
         bool Exists(string cardId);
         string[] LoadAllNames();
+        void Update(string dataJson, string cardId);
     }
-
-
 }

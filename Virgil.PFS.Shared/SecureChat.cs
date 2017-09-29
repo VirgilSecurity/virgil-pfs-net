@@ -32,7 +32,8 @@ namespace Virgil.PFS
             this.myIdentityCard = parameters.IdentityCard;
             this.keyStorageManger = new KeyStorageManger(crypto, this.myIdentityCard.Id, parameters.LtPrivateKeyLifeDays);
             this.cardManager = new EphemeralCardManager(this.crypto, this.keyStorageManger, parameters.ServiceInfo);
-            var sessionHelper = new SessionStorageManager(this.myIdentityCard.Id, parameters.SessionStorage);
+            var sessionStorage = new DefaultUserDataStorage(this.myIdentityCard.Id);
+            var sessionHelper = new SessionStorageManager((IUserDataStorage)sessionStorage);
             this.sessionManager = new SessionManager(myIdentityCard, myPrivateKey, 
                 crypto, sessionHelper, keyStorageManger, parameters.SessionLifeDays);
             this.keysRotator = new KeysRotator(this.myIdentityCard, this.myPrivateKey, this.cardManager);
@@ -54,7 +55,7 @@ namespace Virgil.PFS
 
         public async Task<SecureSession> StartNewSessionWithAsync(CardModel recipientCard, byte[] additionalData = null)
         {
-            this.sessionManager.CheckExistingSession(recipientCard.Id);
+            this.sessionManager.CheckExistingSessionOnStart(recipientCard.Id);
             var credentials = await this.cardManager.GetCredentialsByIdentityCard(recipientCard);
             
             return this.sessionManager.InitializeInitiatorSession(recipientCard, credentials, additionalData);
@@ -66,9 +67,14 @@ namespace Virgil.PFS
             return this.sessionManager.GetActiveSession(recipientCardId);
         }
 
+        public void RemoveSession(string recipientCardId, string sessionId)
+        {
+            this.sessionManager.RemoveSession(recipientCardId, sessionId);
+        }
+
         public void RemoveSession(string recipientCardId)
         {
-            this.sessionManager.RemoveSession(recipientCardId);
+            this.sessionManager.RemoveSessions(recipientCardId);
         }
 
         public async Task<SecureSession> LoadUpSession(CardModel recipientCard, string msg, byte[] additionalData = null)

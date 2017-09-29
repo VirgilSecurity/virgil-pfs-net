@@ -15,7 +15,6 @@
         public IPrivateKey IdentityPrivateKey { get; protected set; }
         public int LtPrivateKeyLifeDays { get; protected set; }
         public int SessionLifeDays { get; protected set; }
-        public Virgil.PFS.Session.IUserDataStorage SessionStorage { get; set; }
 
         public SecureChatPreferences(ICrypto crypto,
             CardModel identityCard,
@@ -40,8 +39,6 @@
             }
             this.LtPrivateKeyLifeDays = longTermPrivateKeyToBeAliveDays;
             this.SessionLifeDays = sessionToBeAliveDays;
-
-            this.SessionStorage = (IUserDataStorage)new DefaultUserDataStorage();
         }
 
         public SecureChatPreferences(ICrypto crypto,

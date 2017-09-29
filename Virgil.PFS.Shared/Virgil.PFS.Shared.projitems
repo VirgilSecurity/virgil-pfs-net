@@ -59,7 +59,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Session\SessionManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Session\SessionState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Session\SessionStorageManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Session\UserDataSafeStorage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\EphemeralCardValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\JsonSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\ServiceInfo.cs" />

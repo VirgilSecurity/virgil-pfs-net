@@ -141,7 +141,7 @@ namespace Virgil.PFS.Tests
             Assert.IsTrue(sessionHelper.ExistSessionState(bobCard.Id));
             Assert.IsFalse(
                 Enumerable.SequenceEqual(
-                    sessionHelper.GetSessionState(bobCard.Id).SessionId, 
+                    sessionHelper.GetNewestSessionState(bobCard.Id).SessionId, 
                     expiredSessionState.SessionId)
             );
 
