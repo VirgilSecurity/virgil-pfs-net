@@ -12,7 +12,7 @@ namespace Virgil.PFS.Session
         string Load(string cardId);
         void Delete(string cardId);
         bool Exists(string cardId);
-        string[] LoadAllNames();
+        string[] FileNames();
         void Update(string dataJson, string cardId);
     }
 }

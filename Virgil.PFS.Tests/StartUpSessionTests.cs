@@ -12,6 +12,7 @@ using Virgil.PFS.Exceptions;
 using Virgil.PFS;
 using Virgil.PFS.KeyUtils;
 using Virgil.PFS.Session;
+using Virgil.SDK;
 
 namespace Virgil.PFS.Tests
 {
@@ -107,15 +108,15 @@ namespace Virgil.PFS.Tests
                 IntegrationHelper.GetServiceInfo());
 
             var expiredSessionState = new SessionState(
-              new byte[] { },
+              new byte[1],
               DateTime.Now.AddDays(-5),
               DateTime.Now.AddDays(-1),
-              new byte[] { });
+              new byte[1]);
 
-            var sessionStorage = new DefaultUserDataStorage();
-            var sessionHelper = new SessionStorageManager(aliceCard.Id, sessionStorage);
+            var sessionStorage = new DefaultUserDataStorage(aliceCard.Id);
+            var sessionHelper = new SessionStorageManager(sessionStorage);
             var keyStorageManger = new KeyStorageManger(crypto, aliceCard.Id, secureChatParamsForAlice.LtPrivateKeyLifeDays);
-            Assert.IsFalse(sessionHelper.ExistSessionState(bobCard.Id));
+            Assert.IsFalse(sessionHelper.ExistSessionStates(bobCard.Id));
            
 
             var secureChatForAlice = new SecureChat(secureChatParamsForAlice);
@@ -127,25 +128,28 @@ namespace Virgil.PFS.Tests
             sessionHelper.SaveSessionState(expiredSessionState, bobCard.Id);
             var expiredSessionKey = new SessionKey()
             {
-                DecryptionKey = new byte[]{},
-                EncryptionKey = new byte[] {}
+                DecryptionKey = new byte[1],
+                EncryptionKey = new byte[1]
             };
-            keyStorageManger.SessionKeyStorage().SaveKeyByName(expiredSessionKey, bobCard.Id);
-            Assert.IsTrue(sessionHelper.ExistSessionState(bobCard.Id));
-            Assert.IsTrue(keyStorageManger.SessionKeyStorage().IsKeyExist(bobCard.Id));
+
+            keyStorageManger.SessionKeyStorage().SaveKeyByName(expiredSessionKey, expiredSessionState.SessionId);
+            Assert.IsTrue(sessionHelper.ExistSessionState(bobCard.Id, expiredSessionState.SessionId));
+
+            Assert.IsTrue(keyStorageManger.SessionKeyStorage().IsKeyExist(expiredSessionState.SessionId));
             
             // Initialize session and save session key, session state
             var session = await secureChatForAlice.StartNewSessionWithAsync(bobCard);
             session.Encrypt("Hi Bob!");
 
-            Assert.IsTrue(sessionHelper.ExistSessionState(bobCard.Id));
+            Assert.IsTrue(sessionHelper.ExistSessionState(bobCard.Id, session.GetId()));
             Assert.IsFalse(
                 Enumerable.SequenceEqual(
                     sessionHelper.GetNewestSessionState(bobCard.Id).SessionId, 
                     expiredSessionState.SessionId)
             );
 
-            Assert.IsTrue(keyStorageManger.SessionKeyStorage().LoadKeyByName(bobCard.Id).DecryptionKey.Length > 0);
+            Assert.IsTrue(keyStorageManger.SessionKeyStorage()
+                .LoadKeyByName(session.GetId()).DecryptionKey.Length > 0);
             secureChatForAlice.GentleReset();
             secureChatForBob.GentleReset();
             await IntegrationHelper.RevokeCard(aliceCard.Id);

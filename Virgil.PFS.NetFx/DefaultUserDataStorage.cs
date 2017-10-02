@@ -19,7 +19,6 @@ namespace Virgil.PFS.Session
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             this.folderPath = Path.Combine(appData, "VirgilSecurity", "Sessions", folderName);
-            Directory.CreateDirectory(this.folderPath);
         }
 
         public string FolderPath()
@@ -40,7 +39,7 @@ namespace Virgil.PFS.Session
 
 
 
-        public string[] LoadAllNames()
+        public string[] FileNames()
         {
             if (Directory.Exists(this.folderPath))
             {
@@ -101,8 +100,13 @@ namespace Virgil.PFS.Session
             }
 
             File.Delete(this.GetFilePath(cardId));
-        }
 
+            if (this.FileNames().Count() == 0)
+            {
+                Directory.Delete(this.folderPath);
+            }
+
+        }
     }
 }
 

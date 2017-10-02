@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using Virgil.PFS.Client;
+using Virgil.SDK;
 using Virgil.SDK.Storage;
 
 namespace Virgil.PFS.KeyUtils
@@ -32,29 +33,29 @@ namespace Virgil.PFS.KeyUtils
             return this.StoragePrefixForCurrentOwner() + name;
         }
 
-        public void SaveKeyByName(SessionKey sessionKey, string InterlocutorCardId)
+        public void SaveKeyByName(SessionKey sessionKey, byte[] sessionId)
         {
             var keyEntry = new KeyEntry
             {
-                Name = this.PathToKey(InterlocutorCardId),
+                Name = this.PathToKey(HexFileName(sessionId)),
                 Value = sessionKey.EncryptionKey.Concat(sessionKey.DecryptionKey).ToArray()
             };
             this.keyStorage.Store(keyEntry);
         }
 
-        public void RemoveKey(string InterlocutorCardId)
+        public void RemoveKey(byte[] sessionId)
         {
-            this.keyStorage.Delete(this.PathToKey(InterlocutorCardId));
+            this.keyStorage.Delete(this.PathToKey(HexFileName(sessionId)));
         }
 
-        public bool IsKeyExist(string InterlocutorCardId)
+        public bool IsKeyExist(byte[] sessionId)
         {
-            return this.keyStorage.Exists(this.PathToKey(InterlocutorCardId));
+            return this.keyStorage.Exists(this.PathToKey(HexFileName(sessionId)));
         }
 
-        public SessionKey LoadKeyByName(string InterlocutorCardId)
+        public SessionKey LoadKeyByName(byte[] sessionId)
         {
-            var entry = this.keyStorage.Load(this.PathToKey(InterlocutorCardId));
+            var entry = this.keyStorage.Load(this.PathToKey(HexFileName(sessionId)));
             var keyLength = entry.Value.Length / 2;
             var sessionKey = new SessionKey()
             {
@@ -67,8 +68,24 @@ namespace Virgil.PFS.KeyUtils
 
         public bool HasKeys()
         {
-            var keyPaths = Array.FindAll(this.keyStorage.Names(), s => s.Contains(this.StoragePrefixForCurrentOwner()));
+            var keyPaths = Array.FindAll(this.keyStorage.Names(), 
+                s => s.Contains(this.StoragePrefixForCurrentOwner()));
             return (keyPaths.Length > 0);
+        }
+
+        public void RemoveAllKeys()
+        {
+            var keyPaths = Array.FindAll(this.keyStorage.Names(), 
+                s => s.Contains(this.StoragePrefixForCurrentOwner()));
+            foreach (var keyPath in keyPaths)
+            {
+                this.keyStorage.Delete(keyPath);
+            }
+        }
+
+        private string HexFileName(byte[] sessionId)
+        {
+            return VirgilBuffer.From(sessionId).ToString(StringEncoding.Hex);
         }
 
     }

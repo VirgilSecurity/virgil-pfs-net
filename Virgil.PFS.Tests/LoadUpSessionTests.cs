@@ -37,8 +37,8 @@ namespace Virgil.PFS.Tests
                 bobKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo());
 
-            var sessionStorage = new DefaultUserDataStorage();
-            var sessionHelper = new SessionStorageManager(bobCard.Id, sessionStorage);
+            var sessionStorage = new DefaultUserDataStorage(bobCard.Id);
+            var sessionHelper = new SessionStorageManager(sessionStorage);
             var keyStorageManger = new KeyStorageManger(crypto, bobCard.Id, secureChatParamsForBob.LtPrivateKeyLifeDays);
 
             var secureChatForAlice = new SecureChat(secureChatParamsForAlice);
@@ -59,14 +59,14 @@ namespace Virgil.PFS.Tests
             Assert.Null(keyStorageManger.OtKeyStorage().LoadKeyInfoByName(initialMessage.ResponderOtcId).ExpiredAt);
 
             var bobSession = await secureChatForBob.LoadUpSession(aliceCard, encryptedMessage);
-            Assert.IsTrue(sessionHelper.ExistSessionState(aliceCard.Id));
+            Assert.IsTrue(sessionHelper.ExistSessionState(aliceCard.Id, bobSession.GetId()));
 
             // should save seesion key
-            Assert.IsTrue(keyStorageManger.SessionKeyStorage().IsKeyExist(aliceCard.Id));
+            Assert.IsTrue(keyStorageManger.SessionKeyStorage().IsKeyExist(session.GetId()));
 
             Assert.IsFalse(keyStorageManger.OtKeyStorage().IsKeyExist(initialMessage.ResponderOtcId));
 
-            Assert.IsTrue(keyStorageManger.SessionKeyStorage().LoadKeyByName(aliceCard.Id).DecryptionKey.Length > 0);
+            Assert.IsTrue(keyStorageManger.SessionKeyStorage().LoadKeyByName(session.GetId()).DecryptionKey.Length > 0);
 
             secureChatForAlice.GentleReset();
             secureChatForBob.GentleReset();
@@ -99,8 +99,8 @@ namespace Virgil.PFS.Tests
                 bobKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo());
 
-            var sessionStorage = new DefaultUserDataStorage();
-            var sessionHelper = new SessionStorageManager(bobCard.Id, sessionStorage);
+            var sessionStorage = new DefaultUserDataStorage(bobCard.Id);
+            var sessionHelper = new SessionStorageManager(sessionStorage);
             var keyStorageManger = new KeyStorageManger(crypto, bobCard.Id, secureChatParamsForBob.LtPrivateKeyLifeDays);
 
             var secureChatForAlice = new SecureChat(secureChatParamsForAlice);

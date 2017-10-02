@@ -38,8 +38,6 @@ namespace Virgil.PFS.Tests
                 bobKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo());
 
-            var sessionStorage = new DefaultUserDataStorage();
-
             var secureChatForAlice = new SecureChat(secureChatParamsForAlice);
             var secureChatForBob = new SecureChat(secureChatParamsForBob);
 
@@ -90,8 +88,8 @@ namespace Virgil.PFS.Tests
                 bobKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo());
 
-            var sessionStorage = new DefaultUserDataStorage();
-            var sessionHelper = new SessionStorageManager(bobCard.Id, sessionStorage);
+            var sessionStorage = new DefaultUserDataStorage(bobCard.Id);
+            var sessionHelper = new SessionStorageManager(sessionStorage);
             var keyStorageManger = new KeyStorageManger(crypto, bobCard.Id, secureChatParamsForBob.LtPrivateKeyLifeDays);
 
             var secureChatForAlice = new SecureChat(secureChatParamsForAlice);

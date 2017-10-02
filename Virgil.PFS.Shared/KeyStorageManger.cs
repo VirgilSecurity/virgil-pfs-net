@@ -46,6 +46,7 @@ namespace Virgil.PFS
         {
             this.OtKeyStorage().RemoveAllKeys();
             this.LtKeyStorage().RemoveAllKeys();
+            this.SessionKeyStorage().RemoveAllKeys();
         } 
 
     }

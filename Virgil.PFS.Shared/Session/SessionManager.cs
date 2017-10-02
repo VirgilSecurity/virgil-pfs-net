@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virgil.Crypto.Pfs;
+using Virgil.PFS.Client;
 using Virgil.PFS.Exceptions;
+using Virgil.SDK;
 using Virgil.SDK.Client;
 using Virgil.SDK.Cryptography;
 
@@ -110,7 +112,7 @@ namespace Virgil.PFS.Session
 
         public void SaveSession(SecureSession session, string recipientCardId)
         {
-            this.keyStorageManger.SessionKeyStorage().SaveKeyByName(session.GetKey(), recipientCardId);
+            this.keyStorageManger.SessionKeyStorage().SaveKeyByName(session.GetKey(), session.GetId());
 
             var sessionState = new SessionState(
                 session.GetId(),
@@ -120,62 +122,40 @@ namespace Virgil.PFS.Session
             this.sessionStorageManager.SaveSessionState(sessionState, recipientCardId);
         }
 
-        public void RemoveSession(string recipientCardId, string sessionId)
+        public void RemoveSession(string recipientCardId, byte[] sessionId)
         {
-            try
-            {
-                if (this.sessionStorageManager.ExistSessionState(recipientCardId, sessionId))
-                {
-                    CleanSessionDataByCardId(recipientCardId);
-                }
-            }
-            catch (Exception)
-            {
-                throw new SessionStorageException("Remove session exception.");
-            }
+            this.RemoveSessionKey(sessionId);
+            this.sessionStorageManager.RemoveSessionState(recipientCardId, sessionId);
         }
 
         public void RemoveSessions(string recipientCardId)
         {
-            try
+            var sessionStates = this.sessionStorageManager.GetSessionStates(recipientCardId);
+            foreach(var sessionState in sessionStates)
             {
-                if (this.sessionStorageManager.ExistSessionStates(recipientCardId))
-                {
-                    this.sessionStorageManager.DeleteSessionStates(recipientCardId);
-                    //todo delete session keys
-                }
+                this.RemoveSessionKey(sessionState.SessionId);
             }
-            catch (Exception)
-            {
-                throw new SessionStorageException("Remove session exception.");
-            }
+            this.sessionStorageManager.RemoveSessionStates(recipientCardId);
         }
 
 
-        private void CleanSessionDataByCardId(string recipientCardId)
-        {
-            this.RemoveSessionKey(recipientCardId);
-            this.sessionStorageManager.DeleteSessionStates(recipientCardId);
-        }
-
-        private void RemoveSessionKey(string cardId)
+        private void RemoveSessionKey(byte[] sessionId)
         {
             if (this.keyStorageManger.SessionKeyStorage()
-                .IsKeyExist(cardId))
+                .IsKeyExist(sessionId))
             {
-                this.keyStorageManger.SessionKeyStorage().RemoveKey(cardId);
+                this.keyStorageManger.SessionKeyStorage().RemoveKey(sessionId);
             }
         }
 
         public void RemoveExpiredSessions()
         {
-            var sessionInfos = this.sessionStorageManager.GetAllSessionStates();
-            foreach (var sessionInfo in sessionInfos)
+            var sessions = this.sessionStorageManager.GetAllSessionStates();
+            foreach (var session in sessions)
             {
-                // todo in the next version to check as isShouldBeDeleted
-                if (sessionInfo.SessionState.IsShouldBeDeleted())
+                if (session.SessionState.IsShouldBeDeleted())
                 {
-                    this.CleanSessionDataByCardId(sessionInfo.CardId);
+                    this.RemoveSession(session.CardId, session.SessionState.SessionId);
                 }
             }
         }
@@ -196,7 +176,6 @@ namespace Virgil.PFS.Session
         public void RemoveAllSessions()
         {
             this.sessionStorageManager.RemoveAllSessionStates();
-            // todo remove all session keys 
         }
 
         
@@ -216,8 +195,7 @@ namespace Virgil.PFS.Session
         {
             try
             {
-                var sessionKey = this.keyStorageManger.SessionKeyStorage().LoadKeyByName(
-                    recipientCardId);
+                var sessionKey = this.keyStorageManger.SessionKeyStorage().LoadKeyByName(sessionState.SessionId);
                 return new SecureSession(sessionState.SessionId,
                      sessionKey.EncryptionKey,
                      sessionKey.DecryptionKey,
@@ -230,6 +208,8 @@ namespace Virgil.PFS.Session
                 throw new SessionStorageException("Unknown session state");
             }
         }
+
+
 
     }
 }

@@ -67,7 +67,7 @@ namespace Virgil.PFS
             return this.sessionManager.GetActiveSession(recipientCardId);
         }
 
-        public void RemoveSession(string recipientCardId, string sessionId)
+        public void RemoveSession(string recipientCardId, byte[] sessionId)
         {
             this.sessionManager.RemoveSession(recipientCardId, sessionId);
         }

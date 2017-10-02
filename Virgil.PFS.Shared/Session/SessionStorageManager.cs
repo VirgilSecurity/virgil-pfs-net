@@ -45,7 +45,7 @@
         public List<SessionInfo> GetAllSessionStates()
         {
             var sessionStates = new List<SessionInfo>();
-            foreach (var recipientId in this.sessionStorage.LoadAllNames())
+            foreach (var recipientId in this.sessionStorage.FileNames())
             {
                 var recipientSessionStates = this.GetSessionStates(recipientId);
                 
@@ -65,13 +65,13 @@
 
         public void RemoveAllSessionStates()
         {
-            foreach (var recipientCardId in this.sessionStorage.LoadAllNames())
+            foreach (var recipientCardId in this.sessionStorage.FileNames())
             {
-                this.DeleteSessionStates(recipientCardId);
+                this.RemoveSessionStates(recipientCardId);
             }
         }
 
-        public void DeleteSessionStates(string recipientCardId)
+        public void RemoveSessionStates(string recipientCardId)
         {
             try
             {
@@ -83,12 +83,45 @@
             }
         }
 
+        public void RemoveSessionState(string recipientCardId, byte[] sessionId)
+        {
+            if (this.ExistSessionStates(recipientCardId))
+            {
+                var sessionStates = this.GetSessionStates(recipientCardId);
+                var sessionState = sessionStates.FirstOrDefault(el => Enumerable.SequenceEqual(el.SessionId,sessionId));
+                if (sessionState != null)
+                {
+                    var sessionStatesList = sessionStates.ToList();
+                    sessionStatesList.Remove(sessionState);
+                    if (sessionStatesList.Count > 0)
+                    {
+                        var sessionStatesJson = JsonSerializer.Serialize(sessionStatesList.ToArray());
+                        this.sessionStorage.Update(sessionStatesJson, recipientCardId);
+                    }
+                    else
+                    {
+                        this.sessionStorage.Delete(recipientCardId);
+                    }
 
-        public bool ExistSessionState(string recipientCardId, string sessionId)
+                }
+                else
+                {
+                    throw new SessionStorageException("Session isn't found.");
+                }
+            }
+            else
+            {
+                throw new SessionStorageException("Session isn't found.");
+            }
+        }
+
+
+        public bool ExistSessionState(string recipientCardId, byte[] sessionId)
         {
             if (this.sessionStorage.Exists(recipientCardId))
             {
                 var sessionStates = this.GetSessionStates(recipientCardId);
+                return (sessionStates.Any(el => Enumerable.SequenceEqual(el.SessionId, sessionId)));
             }
             return false;
         }
@@ -103,18 +136,19 @@
             if (this.sessionStorage.Exists(recipientCardId))
             {
                 var sessionStates = this.GetSessionStates(recipientCardId);
-                if (sessionStates.Any(el => el.SessionId == sessionState.SessionId))
+                if (sessionStates.Any(el => Enumerable.SequenceEqual(el.SessionId, sessionState.SessionId)))
                 {
                     throw new SessionStorageException("Session already exist");
                 }
                 var sessionStatesList = sessionStates.ToList();
                 sessionStatesList.Add(sessionState);
-                var sessionStatesJson = JsonSerializer.Serialize(sessionStatesList);
+                var sessionStatesJson = JsonSerializer.Serialize(sessionStatesList.ToArray());
                 this.sessionStorage.Update(sessionStatesJson, recipientCardId);
             }
             else
             {
-                this.sessionStorage.Save(JsonSerializer.Serialize(sessionState), recipientCardId);
+                this.sessionStorage.Save(
+                    JsonSerializer.Serialize(new SessionState[] {sessionState}), recipientCardId);
             }
         }
 
