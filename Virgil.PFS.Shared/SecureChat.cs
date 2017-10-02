@@ -8,6 +8,7 @@ using Virgil.PFS.Exceptions;
 using Virgil.PFS.KeyUtils;
 using Virgil.PFS.Session;
 using Virgil.PFS.Shared.KeyUtils;
+using Virgil.SDK;
 using Virgil.SDK.Client;
 using Virgil.SDK.Common;
 using Virgil.SDK.Cryptography;

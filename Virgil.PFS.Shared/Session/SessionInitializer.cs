@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Virgil.Crypto.Pfs;
 using Virgil.PFS.Exceptions;
+using Virgil.SDK;
 using Virgil.SDK.Client;
 using Virgil.SDK.Cryptography;
 

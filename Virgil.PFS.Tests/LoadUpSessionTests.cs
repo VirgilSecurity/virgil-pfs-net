@@ -17,23 +17,23 @@ namespace Virgil.PFS.Tests
         public async Task LoadUpSession_Should_SaveSessionFromInitialMessage()
         {
             var crypto = new VirgilCrypto();
-
-            var aliceKeys = crypto.GenerateKeys();
-            var bobKeys = crypto.GenerateKeys();
+            var virgil = IntegrationHelper.GetVirgilApi();
+            var aliceKeys = virgil.Keys.Generate();
+            var bobKeys = virgil.Keys.Generate();
 
             var aliceCard = await IntegrationHelper.CreateCard("Alice" + Guid.NewGuid(), aliceKeys);
             var bobCard = await IntegrationHelper.CreateCard("Bob" + Guid.NewGuid(), bobKeys);
 
             var secureChatParamsForAlice = new SecureChatPreferences(
                 crypto,
-                aliceCard,
+                aliceCard.CardModel,
                 aliceKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo()
                 );
 
             var secureChatParamsForBob = new SecureChatPreferences(
                 crypto,
-                bobCard,
+                bobCard.CardModel,
                 bobKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo());
 
@@ -48,7 +48,7 @@ namespace Virgil.PFS.Tests
             await secureChatForAlice.RotateKeysAsync(1);
 
             // Initialize session and save session key, session state
-            var session = await secureChatForAlice.StartNewSessionWithAsync(bobCard);
+            var session = await secureChatForAlice.StartNewSessionWithAsync(bobCard.CardModel);
 
             var encryptedMessage = session.Encrypt("Hi Bob!");
 
@@ -58,7 +58,7 @@ namespace Virgil.PFS.Tests
             Assert.IsTrue(keyStorageManger.OtKeyStorage().IsKeyExist(initialMessage.ResponderOtcId));
             Assert.Null(keyStorageManger.OtKeyStorage().LoadKeyInfoByName(initialMessage.ResponderOtcId).ExpiredAt);
 
-            var bobSession = await secureChatForBob.LoadUpSession(aliceCard, encryptedMessage);
+            var bobSession = await secureChatForBob.LoadUpSession(aliceCard.CardModel, encryptedMessage);
             Assert.IsTrue(sessionHelper.ExistSessionState(aliceCard.Id, bobSession.GetId()));
 
             // should save seesion key
@@ -70,8 +70,8 @@ namespace Virgil.PFS.Tests
 
             secureChatForAlice.GentleReset();
             secureChatForBob.GentleReset();
-            await IntegrationHelper.RevokeCard(aliceCard.Id);
-            await IntegrationHelper.RevokeCard(bobCard.Id);
+            await IntegrationHelper.RevokeCard(aliceCard);
+            await IntegrationHelper.RevokeCard(bobCard);
         }
 
 
@@ -80,22 +80,23 @@ namespace Virgil.PFS.Tests
         {
             var crypto = new VirgilCrypto();
 
-            var aliceKeys = crypto.GenerateKeys();
-            var bobKeys = crypto.GenerateKeys();
+            var virgil = IntegrationHelper.GetVirgilApi();
+            var aliceKeys = virgil.Keys.Generate();
+            var bobKeys = virgil.Keys.Generate();
 
             var aliceCard = await IntegrationHelper.CreateCard("Alice" + Guid.NewGuid(), aliceKeys);
             var bobCard = await IntegrationHelper.CreateCard("Bob" + Guid.NewGuid(), bobKeys);
 
             var secureChatParamsForAlice = new SecureChatPreferences(
                 crypto,
-                aliceCard,
+                aliceCard.CardModel,
                 aliceKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo()
                 );
 
             var secureChatParamsForBob = new SecureChatPreferences(
                 crypto,
-                bobCard,
+                bobCard.CardModel,
                 bobKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo());
 
@@ -109,21 +110,21 @@ namespace Virgil.PFS.Tests
             await secureChatForBob.RotateKeysAsync(1);
             await secureChatForAlice.RotateKeysAsync(1);
 
-            var session = await secureChatForAlice.StartNewSessionWithAsync(bobCard);
+            var session = await secureChatForAlice.StartNewSessionWithAsync(bobCard.CardModel);
 
             var encryptedMessage = session.Encrypt("Hi Bob!");
             var secondEncryptedMessage = session.Encrypt("How are you?");
             var initialMessage = MessageHelper.ExtractInitialMessage(encryptedMessage);
 
-            await secureChatForBob.LoadUpSession(aliceCard, encryptedMessage);
+            await secureChatForBob.LoadUpSession(aliceCard.CardModel, encryptedMessage);
 
-            var bobSession = secureChatForBob.LoadUpSession(aliceCard, secondEncryptedMessage);
+            var bobSession = secureChatForBob.LoadUpSession(aliceCard.CardModel, secondEncryptedMessage);
             Assert.NotNull(bobSession);
 
             secureChatForAlice.GentleReset();
             secureChatForBob.GentleReset();
-            await IntegrationHelper.RevokeCard(aliceCard.Id);
-            await IntegrationHelper.RevokeCard(bobCard.Id);
+            await IntegrationHelper.RevokeCard(aliceCard);
+            await IntegrationHelper.RevokeCard(bobCard);
         }
 
         [Test]
@@ -131,22 +132,23 @@ namespace Virgil.PFS.Tests
         {
             var crypto = new VirgilCrypto();
 
-            var aliceKeys = crypto.GenerateKeys();
-            var bobKeys = crypto.GenerateKeys();
+            var virgil = IntegrationHelper.GetVirgilApi();
+            var aliceKeys = virgil.Keys.Generate();
+            var bobKeys = virgil.Keys.Generate();
 
             var aliceCard = await IntegrationHelper.CreateCard("Alice" + Guid.NewGuid(), aliceKeys);
             var bobCard = await IntegrationHelper.CreateCard("Bob" + Guid.NewGuid(), bobKeys);
 
             var secureChatParamsForAlice = new SecureChatPreferences(
                 crypto,
-                aliceCard,
+                aliceCard.CardModel,
                 aliceKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo()
                 );
 
             var secureChatParamsForBob = new SecureChatPreferences(
                 crypto,
-                bobCard,
+                bobCard.CardModel,
                 bobKeys.PrivateKey,
                 IntegrationHelper.GetServiceInfo());
 
@@ -156,19 +158,19 @@ namespace Virgil.PFS.Tests
             await secureChatForBob.RotateKeysAsync(1);
             await secureChatForAlice.RotateKeysAsync(1);
 
-            var session = await secureChatForAlice.StartNewSessionWithAsync(bobCard);
+            var session = await secureChatForAlice.StartNewSessionWithAsync(bobCard.CardModel);
             var encryptedMessage = session.Encrypt("Hi Bob!");
             var secondEncryptedMessage = session.Encrypt("How are you?");
             var initialMessage = MessageHelper.ExtractInitialMessage(encryptedMessage);
 
             Assert.ThrowsAsync<SessionStorageException>(
-                async () => await secureChatForBob.LoadUpSession(aliceCard, secondEncryptedMessage)
+                async () => await secureChatForBob.LoadUpSession(aliceCard.CardModel, secondEncryptedMessage)
                 );
 
             secureChatForAlice.GentleReset();
             secureChatForBob.GentleReset();
-            await IntegrationHelper.RevokeCard(aliceCard.Id);
-            await IntegrationHelper.RevokeCard(bobCard.Id);
+            await IntegrationHelper.RevokeCard(aliceCard);
+            await IntegrationHelper.RevokeCard(bobCard);
         }
     }
 }

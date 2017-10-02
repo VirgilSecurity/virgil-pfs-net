@@ -208,8 +208,5 @@ namespace Virgil.PFS.Session
                 throw new SessionStorageException("Unknown session state");
             }
         }
-
-
-
     }
 }

@@ -1,5 +1,6 @@
 ﻿namespace Virgil.PFS
 {
+    using SDK;
     using Virgil.PFS.Exceptions;
     using Virgil.PFS.Session;
     using Virgil.SDK.Client;

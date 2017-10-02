@@ -14,7 +14,7 @@ namespace Virgil.PFS.Tests
 {
     public class IntegrationHelper
     {
-        public static VirgilClient GetVirgilClient()
+        public static VirgilApi GetVirgilApi()
         {
             var parameters = new VirgilClientParams(AppAccessToken);
 
@@ -22,9 +22,26 @@ namespace Virgil.PFS.Tests
             parameters.SetReadCardsServiceAddress(ConfigurationManager.AppSettings["virgil:CardsReadServicesAddress"]);
             parameters.SetIdentityServiceAddress(ConfigurationManager.AppSettings["virgil:IdentityServiceAddress"]);
 
-            var client = new VirgilClient(parameters);
-
-            return client;
+            // To use staging Verifier instead of default verifier
+            var cardVerifier = new CardVerifierInfo
+            {
+                CardId = ConfigurationManager.AppSettings["virgil:ServiceCardId"],
+                PublicKeyData = VirgilBuffer.From(ConfigurationManager.AppSettings["virgil:ServicePublicKeyDerBase64"],
+                StringEncoding.Base64)
+            };
+            var virgil = new VirgilApi(new VirgilApiContext
+            {
+                Credentials = new AppCredentials
+                {
+                    AppId = AppID,
+                    AppKey = VirgilBuffer.From(AppKey),
+                    AppKeyPassword = AppKeyPassword
+                },
+                ClientParams = parameters,
+                UseBuiltInVerifiers = false,
+                CardVerifiers = new[] { cardVerifier }
+            });
+            return virgil;
         }
 
         public static string AppID => ConfigurationManager.AppSettings["virgil:AppID"];
@@ -34,40 +51,20 @@ namespace Virgil.PFS.Tests
         public static string AppAccessToken = ConfigurationManager.AppSettings["virgil:AppAccessToken"];
 
 
-        public static async Task<CardModel> CreateCard(string identity, KeyPair keyPair)
+        public static async Task<VirgilCard> CreateCard(string identity, VirgilKey key)
         {
-            var crypto = new VirgilCrypto();
-            var client = IntegrationHelper.GetVirgilClient();
+            var virgil = GetVirgilApi();
+            var card = virgil.Cards.Create(identity, key);
 
-            var appKey = crypto.ImportPrivateKey(IntegrationHelper.AppKey, IntegrationHelper.AppKeyPassword);
+            await virgil.Cards.PublishAsync(card);
 
-           
-            var exportedPublicKey = crypto.ExportPublicKey(keyPair.PublicKey);
-
-            var aliceIdentity = "alice-" + Guid.NewGuid();
-
-            var request = new PublishCardRequest(identity, "member", exportedPublicKey);
-
-            var requestSigner = new RequestSigner(crypto);
-
-            requestSigner.SelfSign(request, keyPair.PrivateKey);
-            requestSigner.AuthoritySign(request, IntegrationHelper.AppID, appKey);
-            
-            return await client.PublishCardAsync(request);
+            return card;
         }
 
-        public static async Task RevokeCard(string cardId)
+        public static async Task RevokeCard(VirgilCard card)
         {
-            var client = GetVirgilClient();
-            var crypto = new VirgilCrypto();
-            var requestSigner = new RequestSigner(crypto);
-
-            var appKey = crypto.ImportPrivateKey(AppKey, AppKeyPassword);
-
-            var revokeRequest = new RevokeCardRequest(cardId, RevocationReason.Unspecified);
-            requestSigner.AuthoritySign(revokeRequest, AppID, appKey);
-
-            await client.RevokeCardAsync(revokeRequest);
+            var virgil = GetVirgilApi();
+            await virgil.Cards.RevokeAsync(card);
         }
 
         public static ServiceInfo GetServiceInfo()

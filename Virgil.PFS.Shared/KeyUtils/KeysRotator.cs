@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Virgil.SDK;
 using Virgil.SDK.Client;
 using Virgil.SDK.Cryptography;
 
