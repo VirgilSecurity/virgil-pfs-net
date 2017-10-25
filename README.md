@@ -60,7 +60,7 @@ Virgil Security has a powerful set of APIs and the documentation to help you get
 
 * Get Started
   * [PFS Encrypted communication](/documentation/get-started/pfs-encrypted-communication.md)
-* [Guides](/documentation/guides)
+* Guides
   * [Virgil Cards](/documentation/guides/virgil-card)
   * [Virgil Keys](/documentation/guides/virgil-key)
 * [Configuration](/documentation/guides/configuration)
