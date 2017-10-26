@@ -1,6 +1,6 @@
 # Virgil .NET/C# PFS SDK
 
-[Installation](#installation) | [Initialization](#initialization)  |[Documentation](#documentation) | [Support](#support)
+[Installation](#installation) | [Initialization](#initialization)  | [PFS Chat Example](# PFS Chat Example) | [Documentation](#documentation) | [Support](#support)
 
 [Virgil Security](https://virgilsecurity.com) provides a set of APIs for adding security to any application.
 
@@ -31,26 +31,101 @@ To initialize the PFS SDK at the __Client Side__ you need only the __Access Toke
 var virgil = new VirgilApi("[YOUR_ACCESS_TOKEN_HERE]");
 ```
 
+Use Virgil PFS SDK is suitable only for client side. If you need .NET/C# SDK for Server Side take a look at this [repository](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4-docs-review)
 
-To initialize the SDK at the __Server Side__ you need the application credentials (__Access Token__, __App ID__, __App Key__ and __App Key Password__) you got during Application registration at the [Dev Portal](https://developer.virgilsecurity.com/account/signin).
 
-```csharp
-var context = new VirgilApiContext
-{
-    AccessToken = "[YOUR_ACCESS_TOKEN_HERE]",
-    Credentials = new AppCredentials
+## PFS Chat Example
+
+With our SDK you may create unique Virgil Cards for your all users and devices. With users' Virgil Cards, you can easily initialize PFS chat and encrypt any data at Client Side.
+
+In order to begin communicating, each user must run the initialization:
+
+```cs
+var secureChatPreferences = new SecureChatPreferences(
+    "[CRYPTO]",
+        // User's 
+		"[BOB_IDENTITY_CARD]",
+		"[BOB_PRIVATE_KEY]",
+		"[YOUR_ACCESS_TOKEN_HERE]");
+
+this.SecureChat = new SecureChat(secureChatPreferences);
+    try
     {
-        AppId = "[YOUR_APP_ID_HERE]",
-        AppKeyData = VirgilBuffer.FromFile("[YOUR_APP_KEY_PATH_HERE]"),
-        AppKeyPassword = "[YOUR_APP_KEY_PASSWORD_HERE]"
+        await this.SecureChat.RotateKeysAsync(100);
     }
-};
-
-var virgil = new VirgilApi(context);
+    catch(Exception){
+    //...
+    }
 ```
 
+Then Sender establishes a secure PFS conversation with Receiver, encrypts and sends the message:
 
-__Next:__ You can add PFS to your application for secure communication just in few minutes, our [get started guide](/documentation/get-started/pfs-encrypted-communication.md)) provides more details.
+```cs
+public void SendMessage(User receiver, string message) {
+    // get an active session by receiver's card id
+    var session = this.Chat.ActiveSession(receiver.Card.Id);
+    if (session == null)
+	{
+        // start new session with recipient if session wasn't initialized yet
+        try
+        {
+	       	session = await this.chat.StartNewSessionWithAsync(receiver.Card);
+       	}
+       	catch{
+    	   	// Error handling
+       	}
+    }
+    this.SendMessage(receiver, session, message);
+}
+
+public void SendMessage(User receiver, SecureSession session, string message) {
+    string ciphertext;
+    try
+    {
+        // encrypt the message using previously initialized session
+        ciphertext = session.Encrypt(message);
+    }
+    catch (Exception) {
+        // Error handling
+    }
+
+    // send a cipher message to recipient using your messaging service
+    this.Messenger.SendMessage(receiver.Name, ciphertext)
+}
+```
+
+Receiver decrypts the incoming message using the conversation he has just created:
+
+```cs
+public void MessageReceived(string senderName, string message) {
+    var sender = this.Users.Where(x => x.Name == senderName).FirstOrDefault();
+    if (sender == null){
+       return;
+    }
+
+    this.ReceiveMessage(sender, message);
+}
+
+public void ReceiveMessage(User sender, string message) {
+    try
+    {
+        var session = this.Chat.LoadUpSession(sender.Card, message);
+
+        // decrypt message using established session
+        var plaintext = session.Decrypt(message);
+
+        // show a message to the user
+        Print(plaintext);
+    }
+    catch (Exception){
+        // Error handling
+    }
+}
+```
+
+With the open session, which works in both directions, Sender and Receiver can continue PFS encrypted communication.
+
+__Next:__ Take a look at out [Get Started](/documentation/get-started/pfs-encrypted-communication.md) guide to see the whole scenario of the PFS encrypted communication.
 
 
 ## Documentation
