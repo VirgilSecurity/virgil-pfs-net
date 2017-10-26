@@ -1,6 +1,6 @@
 # Virgil .NET/C# PFS SDK
 
-[Installation](#installation) | [Initialization](#initialization)  | [PFS Chat Example](#PFS Chat Example) | [Documentation](#documentation) | [Support](#support)
+[Installation](#installation) | [Initialization](#initialization) | [Documentation](#documentation) | [Support](#support)
 
 [Virgil Security](https://virgilsecurity.com) provides a set of APIs for adding security to any application.
 
