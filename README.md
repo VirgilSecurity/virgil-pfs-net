@@ -58,7 +58,7 @@ __Next:__ You can add PFS to your application for secure communication just in f
 Virgil Security has a powerful set of APIs and the documentation to help you get started:
 
 * Get Started
-  * [PFS Encrypted communication](/documentation/get-started/pfs-encrypted-communication.md)
+  * [PFS Encrypted Сommunication](/documentation/get-started/pfs-encrypted-communication.md)
 * Guides
   * [Virgil Cards](/documentation/guides/virgil-card)
   * [Virgil Keys](/documentation/guides/virgil-key)
