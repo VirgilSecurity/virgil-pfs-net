@@ -1,6 +1,6 @@
 # Virgil .NET/C# PFS SDK
 
-[Installation](#installation) | [Initialization](#initialization)  | [PFS Chat Example](# PFS Chat Example) | [Documentation](#documentation) | [Support](#support)
+[Installation](#installation) | [Initialization](#initialization)  | [PFS Chat Example](#PFS Chat Example) | [Documentation](#documentation) | [Support](#support)
 
 [Virgil Security](https://virgilsecurity.com) provides a set of APIs for adding security to any application.
 
@@ -34,28 +34,28 @@ var virgil = new VirgilApi("[YOUR_ACCESS_TOKEN_HERE]");
 Virgil .NET/C# PFS SDK is suitable only for Client Side. If you need .NET/C# SDK for Server Side take a look at this [repository](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4-docs-review).
 
 
-## PFS Chat Example
+## Chat Example
 
 With our SDK you may create unique Virgil Cards for your all users and devices. With users' Virgil Cards, you can easily initialize PFS chat and encrypt any data at Client Side.
 
 In order to begin communicating, each user must run the initialization:
 
 ```cs
-var secureChatPreferences = new SecureChatPreferences(
-    "[CRYPTO]",
-        // User's 
-		"[BOB_IDENTITY_CARD]",
-		"[BOB_PRIVATE_KEY]",
-		"[YOUR_ACCESS_TOKEN_HERE]");
+var crypto = new VirgilCrypto();
 
-this.SecureChat = new SecureChat(secureChatPreferences);
-    try
-    {
-        await this.SecureChat.RotateKeysAsync(100);
-    }
-    catch(Exception){
-    //...
-    }
+// TODO: Детально разобрать зачем нужны параметры Карта и Приватный ключ
+// а также добавить секцию в этом README о том что, как их создать перед тем как использовать в инициализации
+var preferences = new SecureChatPreferences(
+    crypto, 
+    "[BOB_IDENTITY_CARD]",
+    "[BOB_PRIVATE_KEY]",
+    "[YOUR_ACCESS_TOKEN_HERE]");
+
+// TODO: Объяснить какие задачи выполняет этот класс
+var chat = new SecureChat(preferences);
+
+// TODO: Объяснить зачем этот метод нужгл вызывать время от времени
+await this.SecureChat.RotateKeysAsync(100);
 ```
 
 Then Sender establishes a secure PFS conversation with Receiver, encrypts and sends the message:
@@ -65,7 +65,7 @@ public void SendMessage(User receiver, string message) {
     // get an active session by receiver's card id
     var session = this.Chat.ActiveSession(receiver.Card.Id);
     if (session == null)
-	{
+    {
         // start new session with recipient if session wasn't initialized yet
         try
         {
