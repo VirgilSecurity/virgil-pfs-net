@@ -6,7 +6,6 @@
 
 Using [Perfect Forward Secrecy](https://developer.virgilsecurity.com/docs/references/perfect-forward-secrecy) (PFS) for Encrypted Communication allows you to protect previously intercepted traffic from being decrypted even if the main Private Key is compromised.
 
-The Virgil .NET PFS is provided as a package named Virgil.PFS. The package is distributed via NuGet package management system.
 
 To initialize and use Virgil PFS SDK, you need to have [Developer Account](https://developer.virgilsecurity.com/account/signin).
 
