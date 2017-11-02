@@ -4,9 +4,9 @@
 
 [Virgil Security](https://virgilsecurity.com) provides a set of APIs for adding security to any application.
 
-Using [Perfect Forward Secrecy](https://developer.virgilsecurity.com/docs/references/perfect-forward-secrecy) (PFS) for Encrypted Communication allows you to protect previously intercepted traffic from being decrypted even if the main Private Key is compromised.
+[Perfect Forward Secrecy](https://developer.virgilsecurity.com/docs/references/perfect-forward-secrecy) (PFS) for Encrypted Communication allows you to protect previously intercepted traffic from being decrypted even if the main Private Key is compromised.
 
-Virgil __.NET/C# PFS SDK__ package contains dependent Virgil [.NET/C# SDK](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4) package.
+Virgil __.NET/C# PFS SDK__ contains dependent Virgil [.NET/C# SDK](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4) package.
 
 
 To initialize and use Virgil PFS SDK, you need to have [Developer Account](https://developer.virgilsecurity.com/account/signin).
