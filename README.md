@@ -1,6 +1,6 @@
 # Virgil .NET/C# PFS SDK
 
-[Installation](#installation) | [Initialization](#initialization) | [Documentation](#documentation) | [Support](#support)
+[Installation](#installation) | [Initialization](#initialization) | [Chat Example](#Chat Example) | [Documentation](#documentation) | [Support](#support)
 
 [Virgil Security](https://virgilsecurity.com) provides a set of APIs for adding security to any application.
 
@@ -34,15 +34,13 @@ var virgil = new VirgilApi("[YOUR_ACCESS_TOKEN_HERE]");
 Virgil .NET/C# PFS SDK is suitable only for Client Side. If you need .NET/C# SDK for Server Side take a look at this [repository](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4-docs-review).
 
 
-With our SDK you may create unique Virgil Cards for your all users and devices.
+In Virgil every user has own Private Virgil Key and is represented with a Virgil Card which contains user's Public Key and all necessary information to identify him, take a look [here](#Chat Example) to see more details on how create user's Virgil Card.. 
 
 
  
 ## Chat Example
 
 With users' Virgil Cards, you can easily initialize PFS chat and encrypt any data at Client Side.
-
-> __Note:__ In Virgil every user is represented with a Virgil Card which contains user's Public Key and all necessary (Card ID, User's Identity etc) information to identify them. 
 
 In order to begin communicating, each user must run the initialization:
 
@@ -143,6 +141,9 @@ Virgil Security has a powerful set of APIs and the documentation to help you get
 * [Configuration](/documentation/guides/configuration)
   * [Set Up PFS Client Side](/documentation/guides/configuration/client-pfs.md)
   * [Set Up Server Side](/documentation/guides/configuration/server.md)
+
+
+## Register Users
 
 
 ## License
