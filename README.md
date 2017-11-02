@@ -1,6 +1,6 @@
 # Virgil .NET/C# PFS SDK
 
-[Installation](#installation) | [Initialization](#initialization) | [Chat Example](#Chat Example) | [Documentation](#documentation) | [Support](#support)
+[Installation](#installation) | [Initialization](#initialization) | [Chat Example](#chat-example) | [Documentation](#documentation) | [Support](#support)
 
 [Virgil Security](https://virgilsecurity.com) provides a set of APIs for adding security to any application.
 
@@ -34,7 +34,7 @@ var virgil = new VirgilApi("[YOUR_ACCESS_TOKEN_HERE]");
 Virgil .NET/C# PFS SDK is suitable only for Client Side. If you need .NET/C# SDK for Server Side take a look at this [repository](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4-docs-review).
 
 
-In Virgil every user has own Private Virgil Key and is represented with a Virgil Card which contains user's Public Key and all necessary information to identify him, take a look [here](#Chat Example) to see more details on how create user's Virgil Card.. 
+In Virgil every user has own Private Virgil Key and is represented with a Virgil Card which contains user's Public Key and all necessary information to identify him, take a look [here](#chat-example) to see more details on how create user's Virgil Card.. 
 
 
  
