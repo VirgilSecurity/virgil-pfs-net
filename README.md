@@ -162,7 +162,7 @@ var aliceCard = virgil.Cards.Create("alice", aliceKey);
 // export a Virgil Card to string
 var exportedAliceCard = aliceCard.Export();
 ```
-after Virgil Card creation it is necessary to sign it with Application Private Virgil Key at the server side.
+after Virgil Card creation it is necessary to sign and publish it with Application Private Virgil Key at the server side.
 
 ```cs
 // import a Alice's Virgil Card from string
