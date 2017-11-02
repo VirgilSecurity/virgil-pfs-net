@@ -6,6 +6,8 @@
 
 Using [Perfect Forward Secrecy](https://developer.virgilsecurity.com/docs/references/perfect-forward-secrecy) (PFS) for Encrypted Communication allows you to protect previously intercepted traffic from being decrypted even if the main Private Key is compromised.
 
+Virgil __.NET/C# PFS SDK__ package contains dependent Virgil [.NET/C# SDK](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4) package.
+
 
 To initialize and use Virgil PFS SDK, you need to have [Developer Account](https://developer.virgilsecurity.com/account/signin).
 
@@ -34,21 +36,20 @@ var virgil = new VirgilApi("[YOUR_ACCESS_TOKEN_HERE]");
 Virgil .NET/C# PFS SDK is suitable only for Client Side. If you need .NET/C# SDK for Server Side take a look at this [repository](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4-docs-review).
 
 
-In Virgil every user has own Private Virgil Key and is represented with a Virgil Card which contains user's Public Key and all necessary information to identify him, take a look [here](#chat-example) to see more details on how create user's Virgil Card.. 
+In Virgil every user has own Private Virgil Key and is represented with a Virgil Card which contains user's Public Key and all necessary information to identify him, take a look [here](#register-users) to see more details on how create user's Virgil Card.. 
 
 
  
 ## Chat Example
 
-With users' Virgil Cards, you can easily initialize PFS chat and encrypt any data at Client Side.
+Bofore chat initialization each user must have own Virgil Card, you can easily create it with our [guide](#register-users).
 
 In order to begin communicating, each user must run the initialization:
 
 ```cs
+// initialize Virgil crypto instance
 var crypto = new VirgilCrypto();
-
-// TODO: Детально разобрать зачем нужны параметры Карта и Приватный ключ
-// а также добавить секцию в этом README о том что, как их создать перед тем как использовать в инициализации
+// enter User's credentials to create OTC and LTC Cards
 var preferences = new SecureChatPreferences(
     crypto, 
     "[BOB_IDENTITY_CARD]",
@@ -129,7 +130,7 @@ public void ReceiveMessage(User sender, string message) {
 
 With the open session, which works in both directions, Sender and Receiver can continue PFS encrypted communication.
 
-__Next:__ Take a look at out [Get Started](/documentation/get-started/pfs-encrypted-communication.md) guide to see the whole scenario of the PFS encrypted communication.
+__Next:__ Take a look at our [Get Started](/documentation/get-started/pfs-encrypted-communication.md) guide to see the whole scenario of the PFS encrypted communication.
 
 
 ## Documentation
@@ -144,7 +145,35 @@ Virgil Security has a powerful set of APIs and the documentation to help you get
 
 
 ## Register Users
+In Virgil every user has own Private Virgil Key and is represented with a Virgil Card. Using this Identity Cards we generates special one-time (OTC) and long-time (LTC) cards that have own life-time. Then you can use for each session new OTC and delete it after session finished. 
 
+In order to create user's Identity Virgil Cards use the following code:
+
+```cs
+// generate a new Virgil Key for Alice
+var aliceKey = virgil.Keys.Generate()
+
+// save the Alice's Virgil Key into the storage at her device
+aliceKey.Save("[KEY_NAME]", "[KEY_PASSWORD]");
+
+// create a Alice's Virgil Card
+var aliceCard = virgil.Cards.Create("alice", aliceKey);
+
+// export a Virgil Card to string
+var exportedAliceCard = aliceCard.Export();
+```
+after Virgil Card creation it is necessary to sign it with Application Private Virgil Key at the server side.
+
+```cs
+// import a Alice's Virgil Card from string
+var aliceCard = virgil.Cards.Import(exportedAliceCard);
+
+// publish a Virgil Card at Virgil Services
+await virgil.Cards.PublishAsync(aliceCard);
+```
+Now you have User's Virgil Cards and ready to initialize a PFS Chat. During initialization you create OTC and LTC Cards.
+
+__Next:__ Take a look at our [guides](/documentation/get-started/pfs-encrypted-communication.md) to see more examples. 
 
 ## License
 
