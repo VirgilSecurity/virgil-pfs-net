@@ -13,9 +13,9 @@ To initialize and use Virgil PFS SDK, you need to have [Developer Account](https
 
 ## Installation
 
-The package is available for .NET Framework 4.5 and newer.
+The package is available for .NET Framework 4.5 and later.
 
-Installing the package using Package Manager Console
+Install the package using Package Manager Console:
 
 ```
 PM> Install-Package Virgil.PFS -Version 1.0.3-alpha
@@ -27,39 +27,47 @@ For more details about the Nuget Package Manager installation take a look at [th
 
 Be sure that you have already registered at the [Dev Portal](https://developer.virgilsecurity.com/account/signin) and created your application.
 
-To initialize the PFS SDK at the __Client Side__ you need only the __Access Token__ created for a client at [Dev Portal](https://developer.virgilsecurity.com/account/signin). The Access Token helps to authenticate client's requests.
+To initialize the PFS SDK at the __Client Side__, you need only the __Access Token__ created for a client at [Dev Portal](https://developer.virgilsecurity.com/account/signin).
+The Access Token helps to authenticate client's requests.
 
 ```cs
 var virgil = new VirgilApi("[YOUR_ACCESS_TOKEN_HERE]");
 ```
 
-Virgil .NET/C# PFS SDK is suitable only for Client Side. If you need .NET/C# SDK for Server Side take a look at this [repository](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4-docs-review).
+Virgil .NET/C# PFS SDK is suitable only for Client Side. If you need .NET/C# SDK for Server Side, take a look at this [repository](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4-docs-review).
+
+In Virgil every user:
+* has a Private Key
+* represented with a Virgil Card (Identity Card)
+
+The Virgil Card contains user's Public Key and all information necessary to identify the user.
+Click [here](#register-users) to see more details on how create user's Virgil Card.
 
 
-In Virgil every user has own Private Key and is represented with a Virgil Card which contains user's Public Key and all necessary information to identify him, take a look [here](#register-users) to see more details on how create user's Virgil Card.. 
 
-
- 
 ## Chat Example
 
-Bofore chat initialization each user must have already created own Virgil Card, you can easily create it with our [guide](#register-users).
+Before chat initialization, every user must have created Virgil Card.
+If you have no Virgil Card yet, you can easily create it with our [guide](#register-users).
 
-In order to begin communicating with PFS technology, each user must run the initialization:
+To begin communicating with PFS technology, every user must run the initialization:
 
 ```cs
 // initialize Virgil crypto instance
 var crypto = new VirgilCrypto();
 // enter User's credentials to create OTC and LTC Cards
 var preferences = new SecureChatPreferences(
-    crypto, 
+    crypto,
     "[BOB_IDENTITY_CARD]",
     "[BOB_PRIVATE_KEY]",
     "[YOUR_ACCESS_TOKEN_HERE]");
 
-// це класс опрацьовує всю логіку технології ПФС. Створює LTC i OTL карточки, публікує їх і тому подібне
+// this class performs all PFS-technology logic: creates LTC and OTL Cards, publishes them, etc.
 var chat = new SecureChat(preferences);
 
-// метод періодично визивається щоб перевірити наявність OTC карточок юзера на сервісі, і добавляє нові до зазначаного числа в даному методі
+// the method is periodically called to:
+// - check availability of user's OTC Cards on the service
+// - add new Cards till their quantity reaches the number (100) noted in current method
 await this.SecureChat.RotateKeysAsync(100);
 ```
 
@@ -91,7 +99,7 @@ public void SendMessage(User receiver, SecureSession session, string message) {
         ciphertext = session.Encrypt(message);
     }
     catch (Exception) {
-        // Error handling
+        // error handling
     }
 
     // send a cipher message to recipient using your messaging service
@@ -123,20 +131,29 @@ public void ReceiveMessage(User sender, string message) {
         Print(plaintext);
     }
     catch (Exception){
-        // Error handling
+        // error handling
     }
 }
 ```
 
-With the open session, which works in both directions, Sender and Receiver can continue PFS encrypted communication.
+With the open session, which works in both directions, Sender and Receiver can continue PFS-encrypted communication.
 
-__Next:__ Take a look at our [Get Started](/documentation/get-started/pfs-encrypted-communication.md) guide to see the whole scenario of the PFS encrypted communication.
+__Next:__ Take a look at our [Get Started](/documentation/get-started/pfs-encrypted-communication.md) guide to see the whole scenario of the PFS-encrypted communication.
 
 
 ## Register Users
-In Virgil every user has own Private Virgil Key and is represented with a Virgil Card. Using this Identity Cards we generates special one-time (OTC) and long-time (LTC) cards that have own life-time. Then you can use for each session new OTC and delete it after session finished. 
 
-In order to create user's Identity Virgil Cards use the following code:
+In Virgil every user:
+* has a Private Key
+* represented with a Virgil Card (Identity Card)
+
+Using Identity Cards, we generate special Cards that have their own life-time:
+* One-time Card (OTC)
+* Long-time Card (LTC)
+
+For each session you can use new OTC and delete it after session is finished.
+
+To create user's Identity Virgil Cards, use the following code:
 
 ```cs
 // generate a new Virgil Key for Alice
@@ -154,15 +171,15 @@ var exportedAliceCard = aliceCard.Export();
 after Virgil Card creation it is necessary to sign and publish it with Application Private Virgil Key at the server side.
 
 ```cs
-// import a Alice's Virgil Card from string
+// import Alice's Virgil Card from string
 var aliceCard = virgil.Cards.Import(exportedAliceCard);
 
-// publish a Virgil Card at Virgil Services
+// publish the Virgil Card at Virgil Services
 await virgil.Cards.PublishAsync(aliceCard);
 ```
-Now you have User's Virgil Cards and ready to initialize a PFS Chat. During initialization you create OTC and LTC Cards.
+Now, you have User's Virgil Cards and ready to initialize a PFS Chat. During initialization you create OTC and LTC Cards.
 
-__Next:__ Take a look at our [guides](/documentation/get-started/pfs-encrypted-communication.md) to see more examples. 
+__Next:__ For more examples, take a look at our [guide](/documentation/get-started/pfs-encrypted-communication.md).
 
 ## Documentation
 
@@ -174,7 +191,7 @@ Virgil Security has a powerful set of APIs and the documentation to help you get
   * [Set Up PFS Client Side](/documentation/guides/configuration/client-pfs.md)
   * [Set Up Server Side](/documentation/guides/configuration/server.md)
 
-щоб побачити більше прикладів щодо використаня Virgil Cards перегляньте .NET SDKдокументація (тут ссилка на версію в4 сдк ан рід мі)
+To find more examples how to use Virgil Cards, take a look at [.NET SDK documentation](https://github.com/VirgilSecurity/virgil-sdk-net/blob/v4/README.md)
 
 ## License
 
