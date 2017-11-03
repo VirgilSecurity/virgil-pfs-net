@@ -177,7 +177,7 @@ var aliceCard = virgil.Cards.Import(exportedAliceCard);
 // publish the Virgil Card at Virgil Services
 await virgil.Cards.PublishAsync(aliceCard);
 ```
-Now, you have User's Virgil Cards and ready to initialize a PFS Chat. During initialization you create OTC and LTC Cards.
+Now, you have user's Virgil Cards and ready to initialize a PFS Chat. During initialization you create OTC and LTC Cards.
 
 Find more examples in our [guide](/docs/get-started/pfs-encrypted-communication.md).
 
