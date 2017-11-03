@@ -34,14 +34,14 @@ The Access Token helps to authenticate client's requests.
 var virgil = new VirgilApi("[YOUR_ACCESS_TOKEN_HERE]");
 ```
 
-Virgil .NET/C# PFS SDK is suitable only for Client Side. If you need .NET/C# SDK for Server Side, take a look at this [repository](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4-docs-review).
+Virgil .NET/C# PFS SDK is suitable only for Client Side. If you need .NET/C# SDK for Server Side, take a look at this [repository](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4).
 
 In Virgil every user:
 * has a Private Key
 * represented with a Virgil Card (Identity Card)
 
 The Virgil Card contains user's Public Key and all information necessary to identify the user.
-Click [here](#register-users) to see more details on how create user's Virgil Card.
+Click [here](#register-users) to see more details on how to create user's Virgil Card.
 
 
 
@@ -138,7 +138,7 @@ public void ReceiveMessage(User sender, string message) {
 
 With the open session, which works in both directions, Sender and Receiver can continue PFS-encrypted communication.
 
-__Next:__ Take a look at our [Get Started](/documentation/get-started/pfs-encrypted-communication.md) guide to see the whole scenario of the PFS-encrypted communication.
+__Next:__ Take a look at our [Get Started](/docs/get-started/pfs-encrypted-communication.md) guide to see the whole scenario of the PFS-encrypted communication.
 
 
 ## Register Users
@@ -179,17 +179,17 @@ await virgil.Cards.PublishAsync(aliceCard);
 ```
 Now, you have User's Virgil Cards and ready to initialize a PFS Chat. During initialization you create OTC and LTC Cards.
 
-__Next:__ For more examples, take a look at our [guide](/documentation/get-started/pfs-encrypted-communication.md).
+Find more examples in our [guide](/docs/get-started/pfs-encrypted-communication.md).
 
 ## Documentation
 
 Virgil Security has a powerful set of APIs and the documentation to help you get started:
 
 * Get Started
-  * [PFS Encrypted Сommunication](/documentation/get-started/pfs-encrypted-communication.md)
-* [Configuration](/documentation/guides/configuration)
-  * [Set Up PFS Client Side](/documentation/guides/configuration/client-pfs.md)
-  * [Set Up Server Side](/documentation/guides/configuration/server.md)
+  * [PFS Encrypted Сommunication](/docs/get-started/pfs-encrypted-communication.md)
+* [Configuration](/docs/guides/configuration)
+  * [Set Up PFS Client Side](/docs/guides/configuration/client-pfs.md)
+  * [Set Up Server Side](/docs/guides/configuration/server.md)
 
 To find more examples how to use Virgil Cards, take a look at [.NET SDK documentation](https://github.com/VirgilSecurity/virgil-sdk-net/blob/v4/README.md)
 
