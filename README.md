@@ -37,8 +37,8 @@ var virgil = new VirgilApi("[YOUR_ACCESS_TOKEN_HERE]");
 Virgil .NET/C# PFS SDK is suitable only for Client Side. If you need .NET/C# SDK for Server Side, take a look at this [repository](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4).
 
 In Virgil every user:
-* Has a *Private Key*
-* Represented with a *Virgil Card (Identity Card)*
+* Has a **Private Key**
+* Represented with a **Virgil Card (Identity Card)**
 
 The Virgil Card contains user's Public Key and all information necessary to identify the user.
 Click [here](#register-users) to see more details on how to create user's Virgil Card.
@@ -144,12 +144,12 @@ __Next:__ Take a look at our [Get Started](/docs/get-started/pfs-encrypted-commu
 ## Register Users
 
 In Virgil every user:
-* Has a *Private Key*
-* Represented with a *Virgil Card (Identity Card)*
+* Has a **Private Key**
+* Represented with a **Virgil Card (Identity Card)**
 
 Using Identity Cards, we generate special Cards that have their own life-time:
-* *One-time Card (OTC)*
-* *Long-time Card (LTC)*
+* **One-time Card (OTC)**
+* **Long-time Card (LTC)**
 
 For each session you can use new OTC and delete it after session is finished.
 
