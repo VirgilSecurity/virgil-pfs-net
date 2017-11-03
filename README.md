@@ -1,6 +1,6 @@
 # Virgil .NET/C# PFS SDK
 
-[Installation](#installation) | [Initialization](#initialization) | [Chat Example](#chat-example) | [Documentation](#documentation) | [Support](#support)
+[Installation](#installation) | [Initialization](#initialization) | [Chat Example](#chat-example) | [Register Users](#register-users) | [Documentation](#documentation) | [Support](#support)
 
 [Virgil Security](https://virgilsecurity.com) provides a set of APIs for adding security to any application.
 
@@ -36,15 +36,15 @@ var virgil = new VirgilApi("[YOUR_ACCESS_TOKEN_HERE]");
 Virgil .NET/C# PFS SDK is suitable only for Client Side. If you need .NET/C# SDK for Server Side take a look at this [repository](https://github.com/VirgilSecurity/virgil-sdk-net/tree/v4-docs-review).
 
 
-In Virgil every user has own Private Virgil Key and is represented with a Virgil Card which contains user's Public Key and all necessary information to identify him, take a look [here](#register-users) to see more details on how create user's Virgil Card.. 
+In Virgil every user has own Private Key and is represented with a Virgil Card which contains user's Public Key and all necessary information to identify him, take a look [here](#register-users) to see more details on how create user's Virgil Card.. 
 
 
  
 ## Chat Example
 
-Bofore chat initialization each user must have own Virgil Card, you can easily create it with our [guide](#register-users).
+Bofore chat initialization each user must have already created own Virgil Card, you can easily create it with our [guide](#register-users).
 
-In order to begin communicating, each user must run the initialization:
+In order to begin communicating with PFS technology, each user must run the initialization:
 
 ```cs
 // initialize Virgil crypto instance
@@ -56,10 +56,10 @@ var preferences = new SecureChatPreferences(
     "[BOB_PRIVATE_KEY]",
     "[YOUR_ACCESS_TOKEN_HERE]");
 
-// TODO: Объяснить какие задачи выполняет этот класс
+// це класс опрацьовує всю логіку технології ПФС. Створює LTC i OTL карточки, публікує їх і тому подібне
 var chat = new SecureChat(preferences);
 
-// TODO: Объяснить зачем этот метод нужгл вызывать время от времени
+// метод періодично визивається щоб перевірити наявність OTC карточок юзера на сервісі, і добавляє нові до зазначаного числа в даному методі
 await this.SecureChat.RotateKeysAsync(100);
 ```
 
@@ -133,17 +133,6 @@ With the open session, which works in both directions, Sender and Receiver can c
 __Next:__ Take a look at our [Get Started](/documentation/get-started/pfs-encrypted-communication.md) guide to see the whole scenario of the PFS encrypted communication.
 
 
-## Documentation
-
-Virgil Security has a powerful set of APIs and the documentation to help you get started:
-
-* Get Started
-  * [PFS Encrypted Сommunication](/documentation/get-started/pfs-encrypted-communication.md)
-* [Configuration](/documentation/guides/configuration)
-  * [Set Up PFS Client Side](/documentation/guides/configuration/client-pfs.md)
-  * [Set Up Server Side](/documentation/guides/configuration/server.md)
-
-
 ## Register Users
 In Virgil every user has own Private Virgil Key and is represented with a Virgil Card. Using this Identity Cards we generates special one-time (OTC) and long-time (LTC) cards that have own life-time. Then you can use for each session new OTC and delete it after session finished. 
 
@@ -174,6 +163,18 @@ await virgil.Cards.PublishAsync(aliceCard);
 Now you have User's Virgil Cards and ready to initialize a PFS Chat. During initialization you create OTC and LTC Cards.
 
 __Next:__ Take a look at our [guides](/documentation/get-started/pfs-encrypted-communication.md) to see more examples. 
+
+## Documentation
+
+Virgil Security has a powerful set of APIs and the documentation to help you get started:
+
+* Get Started
+  * [PFS Encrypted Сommunication](/documentation/get-started/pfs-encrypted-communication.md)
+* [Configuration](/documentation/guides/configuration)
+  * [Set Up PFS Client Side](/documentation/guides/configuration/client-pfs.md)
+  * [Set Up Server Side](/documentation/guides/configuration/server.md)
+
+щоб побачити більше прикладів щодо використаня Virgil Cards перегляньте .NET SDKдокументація (тут ссилка на версію в4 сдк ан рід мі)
 
 ## License
 
