@@ -181,7 +181,7 @@ Find more examples in our [guide](/docs/get-started/pfs-encrypted-communication.
 
 Virgil Security has a powerful set of APIs and the documentation to help you get started:
 
-* Get Started
+* [Get Started](/docs/get-started)
   * [PFS Encrypted Сommunication](/docs/get-started/pfs-encrypted-communication.md)
 * [Configuration](/docs/guides/configuration)
   * [Set Up PFS Client Side](/docs/guides/configuration/client-pfs.md)
