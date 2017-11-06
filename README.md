@@ -158,7 +158,7 @@ var aliceKey = virgil.Keys.Generate()
 // save the Alice's Virgil Key into the storage at her device
 aliceKey.Save("[KEY_NAME]", "[KEY_PASSWORD]");
 
-// create a Alice's Virgil Card
+// create Alice's Virgil Card
 var aliceCard = virgil.Cards.Create("alice", aliceKey);
 
 // export a Virgil Card to string
